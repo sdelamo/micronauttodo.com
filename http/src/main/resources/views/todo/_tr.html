@@ -1,0 +1,6 @@
+<tr th:fragment="tr(todo)"
+    xmlns:th="http://www.thymeleaf.org"
+    th:id="@{|todo-${todo.id}|}">
+    <th scope="row" th:text="${todo.task}"></th>
+    <td><form th:replace="~{todo/_delete :: delete(${todo})}"></form></td>
+</tr>

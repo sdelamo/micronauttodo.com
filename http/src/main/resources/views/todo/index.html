@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layout :: layout(~{::title},~{::script},~{::main})}" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:text="#{todo.list}"></title>
+        <script></script>
+    </head>
+    <body>
+        <main>
+            <h1 th:text="#{todo.list}"></h1>
+            <table th:replace="~{todo/_table :: table(${todos})}"></table>
+            <div th:replace="~{todo/_form :: form()}"></div>
+        </main>
+    </body>
+</html>

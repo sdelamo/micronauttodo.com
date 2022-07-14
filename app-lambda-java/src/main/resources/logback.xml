@@ -1,0 +1,18 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>false</withJansi>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %X{AWSRequestId} %X{AWSFunctionVersion}  %X{AWS-XRAY-TRACE-ID} %-5p %c{1} - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
+<!--
+    <logger name="io.micronaut.http.server" level="TRACE"/>
+    <logger name="io.micronaut.http.client" level="TRACE"/>
+    <logger name="io.micronaut.security" level="TRACE"/>
+-->
+</configuration>

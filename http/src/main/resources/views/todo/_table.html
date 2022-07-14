@@ -1,0 +1,10 @@
+<div th:fragment="table(todos)" xmlns:th="http://www.thymeleaf.org">
+    <table class="table table-striped">
+        <tbody id="todos-rows">
+            <tr th:each="todo : ${todos}"
+                th:include="todo/_tr :: tr(${todo})"
+                th:id="@{|todo-${todo.id}|}"
+            />
+        </tbody>
+    </table>
+</div>

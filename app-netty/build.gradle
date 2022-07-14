@@ -1,0 +1,37 @@
+plugins {
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.micronaut.application") version "3.5.0"
+}
+
+version = "0.1"
+group = "com.micronautodo"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(project(":http"))
+}
+
+
+application {
+    mainClass.set("com.micronauttodo.nettyruntime.Application")
+}
+java {
+    sourceCompatibility = JavaVersion.toVersion("11")
+    targetCompatibility = JavaVersion.toVersion("11")
+}
+
+graalvmNative.toolchainDetection = false
+micronaut {
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("com.micronauttodo.nettyruntime.*")
+    }
+}
+
+
+

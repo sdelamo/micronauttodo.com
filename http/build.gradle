@@ -1,0 +1,66 @@
+plugins {
+    id("java-library")
+}
+
+version = "0.1"
+group = "com.micronauttodo"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    annotationProcessor "io.micronaut:micronaut-inject-java"
+    annotationProcessor "io.micronaut:micronaut-validation"
+
+    implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    implementation "io.micronaut:micronaut-runtime"
+    implementation "io.micronaut:micronaut-inject"
+    implementation "io.micronaut:micronaut-validation"
+
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    implementation("io.micronaut:micronaut-management")
+    implementation("io.micronaut.views:micronaut-views-thymeleaf")
+
+    api(project(":persistence"))
+
+    annotationProcessor("io.micronaut.security:micronaut-security-annotations")
+    implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut.security:micronaut-security-oauth2")
+
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testImplementation("io.micronaut:micronaut-http-client")
+
+    testImplementation("com.github.ksuid:ksuid:1.1.1")
+
+    testAnnotationProcessor(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testImplementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    testImplementation("io.micronaut:micronaut-http-server-netty")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("io.micronaut.test:micronaut-test-junit5")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers")
+    testRuntimeOnly("ch.qos.logback:logback-classic")
+
+    testImplementation("io.micronaut.aws:micronaut-aws-sdk-v2")
+    testImplementation "software.amazon.awssdk:dynamodb", {
+        exclude group: "software.amazon.awssdk", module: "apache-client"
+        exclude group: "software.amazon.awssdk", module: "netty-nio-client"
+    }
+    testImplementation "software.amazon.awssdk:url-connection-client"
+
+
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion("11")
+    targetCompatibility = JavaVersion.toVersion("11")
+}
+
+tasks.named("test") {
+    useJUnitPlatform()
+}

@@ -1,0 +1,11 @@
+<div th:fragment="form()" xmlns:th="http://www.thymeleaf.org">
+    <form action="/todo" method="post">
+        <div class="mb-3">
+            <label for="task" th:text="#{todo.name}" class="form-label"></label>
+            <input type="text" id="task" name="task" class="form-control"/>
+        </div>
+        <div class="mb-3">
+            <input type="submit" th:value="#{todo.save}" class="btn btn-primary"/>
+        </div>
+    </form>
+</div>

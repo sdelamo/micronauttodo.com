@@ -1,0 +1,9 @@
+rootProject.name="micronauttodo"
+
+include("app-netty")
+include("app-lambda-java")
+include("app-lambda-graalvm")
+include("http")
+include("infra")
+include("function-cognito-post-confirmation")
+include("persistence")
