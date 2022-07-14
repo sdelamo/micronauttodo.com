@@ -2,20 +2,19 @@ package com.micronauttodo.views;
 
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.Nullable;
-import io.micronaut.security.authentication.Authentication;
 
 @Introspected
 public class Model {
 
     @Nullable
-    private Authentication authentication;
+    private String email;
 
     @Nullable
-    public Authentication getAuthentication() {
-        return authentication;
+    public String getEmail() {
+        return email;
     }
 
-    public void setAuthentication(@Nullable Authentication authentication) {
-        this.authentication = authentication;
+    public void setEmail(@Nullable String email) {
+        this.email = email;
     }
 }

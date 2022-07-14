@@ -23,16 +23,16 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarText">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item" th:unless="${authentication}">
+                <li class="nav-item" th:unless="${email}">
                     <a class="nav-link active" href="/oauth/login/cognito" th:text="#{login}"></a>
                 </li>
-                <li class="nav-item" th:if="${authentication}">
+                <li class="nav-item" th:if="${email}">
                     <a class="nav-link active" href="/oauth/logout" th:text="#{logout}"></a>
                 </li>
             </ul>
             <span class="navbar-text"
-                  th:if="${authentication}"
-                  th:text="${authentication.attributes.get('email')}">
+                  th:if="${email}"
+                  th:text="${email}">
             </span>
         </div>
     </div>

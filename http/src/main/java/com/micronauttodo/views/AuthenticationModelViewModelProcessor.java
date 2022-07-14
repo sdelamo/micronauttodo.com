@@ -18,6 +18,6 @@ public class AuthenticationModelViewModelProcessor implements ViewModelProcessor
     @Override
     public void process(@NonNull HttpRequest<?> request, @NonNull ModelAndView<Model> modelAndView) {
         securityService.getAuthentication().ifPresent(auth ->
-                modelAndView.getModel().ifPresent(m -> m.setAuthentication(auth)));
+                modelAndView.getModel().ifPresent(m -> m.setEmail(auth.getAttributes().get("email").toString())));
     }
 }
