@@ -1,3 +1,16 @@
+An application built in Java and the [Micronaut Framework](https://micronaut.io). 
+
+It uses: 
+
+- [Route53](https://aws.amazon.com/route53/)
+- [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
+- [AWS Lambda](https://aws.amazon.com/lambda/)
+- [Amazon Cognito](https://aws.amazon.com/cognito/)
+- [Amazon Certificate Manager](https://aws.amazon.com/certificate-manager/)
+- [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) table for storage.
+
+One lambda is deployed a [GraalVM](https://www.graalvm.org) native executable using AWS Lambda Custom Runtime. 
+
 ## Architecture
 
 ![](architecture1.jpeg)
@@ -5,6 +18,10 @@
 ## Modules
 
 ![](modules.jpeg)
+
+## Deploy
+
+
 
 ## Manual Steps
 
@@ -21,3 +38,32 @@ Create an A Record for `auth.` with an alias to your cognito user pool cloud fro
 ![](cognito-user-pool-cloudfrontdistribution.png)
 
 ![](route-53-arecord.png)
+
+## Requirements
+
+- [AWS CLI](https://aws.amazon.com/cli/)
+- [AWS CDK](https://aws.amazon.com/cdk/)
+- Java 11
+
+
+## How to Deploy 
+
+Change `Main.java` to use your project domain name. 
+
+Use AWS CLI to authenticate.
+
+```
+% aws configure
+AWS Access Key ID [****************]: 
+AWS Secret Access Key [****************]: 
+Default region name [us-east-1]:
+Default output format [None]:
+```
+
+Run the release script
+
+```
+% ./release.sh
+
+```
+
