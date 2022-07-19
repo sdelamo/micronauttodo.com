@@ -70,3 +70,11 @@ Run the release script
 
 ```
 
+## Local Development
+
+Run [DynamoDB Local via Docker](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html)
+
+```
+docker run -it --rm -p 8000:8000 amazon/dynamodb-local
+```
+
