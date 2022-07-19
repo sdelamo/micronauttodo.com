@@ -1,3 +1,20 @@
 micronaut:
   application:
     name: app-netty
+---
+micronaut:
+  router:
+    static-resources:
+      assets:
+        paths: 'classpath:assets'
+        mapping: '/assets/**'
+
+---
+micronaut:
+  security:
+    intercept-url-map:
+      -
+        http-method: GET
+        pattern: '/assets/javascripts/controllers/*'
+        access:
+          - 'isAnonymous()'
