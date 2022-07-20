@@ -44,4 +44,25 @@ public class OAuthUser {
     public String getEmail() {
         return email;
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        OAuthUser oAuthUser = (OAuthUser) o;
+
+        if (!iss.equals(oAuthUser.iss)) return false;
+        if (!sub.equals(oAuthUser.sub)) return false;
+        return email.equals(oAuthUser.email);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = iss.hashCode();
+        result = 31 * result + sub.hashCode();
+        result = 31 * result + email.hashCode();
+        return result;
+    }
 }

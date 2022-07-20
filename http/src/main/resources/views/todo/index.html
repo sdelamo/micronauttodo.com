@@ -2,9 +2,18 @@
 <html lang="en" th:replace="~{layout :: layout(~{::title},~{::script},~{::main})}" xmlns:th="http://www.thymeleaf.org">
     <head>
         <title th:text="#{todo.list}"></title>
-        <script></script>
+        <script type="module">
+        const wsUrl = ((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/chat/[[${room.id}]]";
+        const socket = new WebSocket(wsUrl);
+        socket.addEventListener('open', function (event) {
+            console.log(event);
+        });
+        import hotwiredTurbo from 'https://cdn.skypack.dev/@hotwired/turbo';
+        Turbo.session.connectStreamSource(socket);
+    </script>
     </head>
     <body>
+
         <main>
             <h1 th:text="#{todo.list}"></h1>
             <table th:replace="~{todo/_table :: table(${todos})}"></table>

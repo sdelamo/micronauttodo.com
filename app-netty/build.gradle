@@ -12,8 +12,11 @@ repositories {
 
 dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
-    runtimeOnly(project(":http"))
+    implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation(project(":http"))
     implementation(project(":dynamodb"))
+    implementation("io.micronaut.reactor:micronaut-reactor")
+    implementation("io.micronaut.views:micronaut-views-core")
 }
 
 

@@ -13,6 +13,9 @@ public class Model {
     @NonNull
     private String assetsUrl = "";
 
+    @NonNull
+    private String websocketsUrl = "localhost";
+
     @Nullable
     public String getEmail() {
         return email;
@@ -20,6 +23,15 @@ public class Model {
 
     public void setEmail(@Nullable String email) {
         this.email = email;
+    }
+
+    @NonNull
+    public String getWebsocketsUrl() {
+        return websocketsUrl;
+    }
+
+    public void setWebsocketsUrl(@NonNull String websocketsUrl) {
+        this.websocketsUrl = websocketsUrl;
     }
 
     @NonNull

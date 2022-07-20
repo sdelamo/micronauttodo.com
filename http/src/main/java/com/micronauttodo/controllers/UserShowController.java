@@ -10,16 +10,17 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.security.token.jwt.cookie.AccessTokenCookieConfiguration;
+import io.micronaut.security.token.jwt.cookie.JwtCookieTokenReader;
 import io.micronaut.views.View;
 import io.swagger.v3.oas.annotations.Hidden;
 
 @Controller
 class UserShowController {
 
-    private final AccessTokenCookieConfiguration accessTokenCookieConfiguration;
+    private final JwtCookieTokenReader tokenReader;
 
-    UserShowController(AccessTokenCookieConfiguration accessTokenCookieConfiguration) {
-        this.accessTokenCookieConfiguration = accessTokenCookieConfiguration;
+    UserShowController(JwtCookieTokenReader tokenReader) {
+        this.tokenReader = tokenReader;
     }
 
     @Hidden
@@ -28,8 +29,8 @@ class UserShowController {
     @View("user/show.html")
     @ExecuteOn(TaskExecutors.IO)
     HttpResponse<?> show(HttpRequest<?> request) {
-        return request.getCookies().findCookie(accessTokenCookieConfiguration.getCookieName())
-                .map(cookie -> HttpResponse.ok(new UserModel(cookie.getValue())))
+        return tokenReader.findToken(request)
+                .map(token -> HttpResponse.ok(new UserModel(token)))
                 .orElseGet(HttpResponse::serverError);
     }
 }
