@@ -11,8 +11,11 @@ repositories {
 
 dependencies {
     annotationProcessor(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    annotationProcessor("io.micronaut.openapi:micronaut-openapi")
+    implementation("io.swagger.core.v3:swagger-annotations")
     annotationProcessor "io.micronaut:micronaut-inject-java"
     annotationProcessor "io.micronaut:micronaut-validation"
+
 
     implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     implementation "io.micronaut:micronaut-runtime"

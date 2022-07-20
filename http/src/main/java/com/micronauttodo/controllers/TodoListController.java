@@ -11,6 +11,8 @@ import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.views.View;
+import io.swagger.v3.oas.annotations.Hidden;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +24,7 @@ class TodoListController {
         this.todoRepository = todoRepository;
     }
 
+    @Hidden
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @Get("/todo")
     @View("todo/index.html")

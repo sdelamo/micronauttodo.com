@@ -1,7 +1,6 @@
 package com.micronauttodo.controllers;
 
 import com.micronauttodo.persistence.OAuthUser;
-import com.micronauttodo.persistence.Todo;
 import com.micronauttodo.persistence.TodoRepository;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpRequest;
@@ -19,9 +18,9 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.views.turbo.TurboStream;
 import io.micronaut.views.turbo.http.TurboMediaType;
+import io.swagger.v3.oas.annotations.Hidden;
 
 import javax.validation.constraints.NotBlank;
-import java.util.Collections;
 
 @Controller
 class TodoDeleteController {
@@ -32,6 +31,7 @@ class TodoDeleteController {
         this.repository = repository;
     }
 
+    @Hidden
     @Post("/todo/{id}/delete")
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)

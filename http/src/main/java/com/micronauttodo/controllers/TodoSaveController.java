@@ -8,7 +8,6 @@ import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Consumes;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
@@ -20,10 +19,9 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.views.turbo.TurboStream;
 import io.micronaut.views.turbo.http.TurboMediaType;
+import io.swagger.v3.oas.annotations.Hidden;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
 @Controller
@@ -35,6 +33,7 @@ public class TodoSaveController {
         this.todoSaveService = todoSaveService;
     }
 
+    @Hidden
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @Produces(MediaType.TEXT_HTML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
