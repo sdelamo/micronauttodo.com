@@ -13,6 +13,14 @@ import software.amazon.awscdk.services.apigateway.DomainNameOptions;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
 import software.amazon.awscdk.services.certificatemanager.Certificate;
 import software.amazon.awscdk.services.certificatemanager.CertificateValidation;
+import software.amazon.awscdk.services.cloudfront.Behavior;
+import software.amazon.awscdk.services.cloudfront.CloudFrontWebDistribution;
+import software.amazon.awscdk.services.cloudfront.OriginAccessIdentity;
+import software.amazon.awscdk.services.cloudfront.S3OriginConfig;
+import software.amazon.awscdk.services.cloudfront.SourceConfiguration;
+import software.amazon.awscdk.services.cloudfront.ViewerCertificate;
+import software.amazon.awscdk.services.cloudfront.ViewerCertificateOptions;
+import software.amazon.awscdk.services.cloudfront.ViewerProtocolPolicy;
 import software.amazon.awscdk.services.cognito.CustomDomainOptions;
 import software.amazon.awscdk.services.cognito.OAuthFlows;
 import software.amazon.awscdk.services.cognito.OAuthScope;
@@ -39,11 +47,13 @@ import software.amazon.awscdk.services.route53.HostedZoneProviderProps;
 import software.amazon.awscdk.services.route53.IHostedZone;
 import software.amazon.awscdk.services.route53.RecordTarget;
 import software.amazon.awscdk.services.route53.targets.ApiGateway;
+import software.amazon.awscdk.services.route53.targets.CloudFrontTarget;
 import software.amazon.awscdk.services.s3.Bucket;
 import software.amazon.awscdk.services.ses.CfnEmailIdentity;
 import software.constructs.Construct;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +106,7 @@ public class AppStack extends Stack {
         Function functionNative = createAppFunction(environmentVariables, appModuleNative.getName(), true).build();
         table.grantReadWriteData(functionNative);
 
-        LambdaRestApi api = createApi(functionNative, cert, zone);
+        LambdaRestApi api = createApi("webapp", functionNative, cert, zone);
 
         Module postConfirmationModule = project.findModuleByName(Main.MODULE_FUNCTION_COGNITO_POST_CONFIRMATION);
         Function postConfirmationFunction = createFunction(environmentVariables,
@@ -109,7 +119,53 @@ public class AppStack extends Stack {
         addEnvironmentVariablesToFunction(environmentVariables, function);
         addEnvironmentVariablesToFunction(environmentVariables, functionNative);
 
+        Bucket openApiBucket = createBucket(project.getName() + "-s3-openapi");
+        createCloudFrontDistribution("openapi", cert, openApiBucket, zone, "micronaut-todo-1.0.yml");
+
+        Bucket assetsBucket = createBucket(project.getName() + "-s3-assets");
+        createCloudFrontDistribution("assets", cert, assetsBucket, zone, "index.html");
+
+        Bucket webBucket = createBucket(project.getName() + "-s3-web");
+        createCloudFrontDistribution(null, cert, webBucket, zone, "index.html");
+
         output(api);
+    }
+
+    private Bucket createBucket(String id) {
+        return Bucket.Builder.create(this, id).build();
+    }
+
+    private CloudFrontWebDistribution createCloudFrontDistribution(String subdomain,
+                                                                   Certificate certificate,
+                                                                   Bucket bucket,
+                                                                   IHostedZone zone,
+                                                                   String defaultRootObject) {
+        String domainName = subdomain != null ?
+                subdomain + "." + project.getDomainName() : project.getDomainName();
+        CloudFrontWebDistribution cloudFrontWebDistribution = CloudFrontWebDistribution.Builder.create(this,
+                project.getName() + "-" + subdomain  + "-cloudfront-distribution")
+                .originConfigs(Collections.singletonList(SourceConfiguration.builder()
+                        .s3OriginSource(S3OriginConfig.builder()
+                                .s3BucketSource(bucket)
+                                .originAccessIdentity(OriginAccessIdentity.Builder.create(this, project.getName() + "-origin-access-identity")
+                                        .build())
+                                .build())
+                        .behaviors(Collections.singletonList(Behavior.builder()
+                                .isDefaultBehavior(true)
+                                .viewerProtocolPolicy(ViewerProtocolPolicy.REDIRECT_TO_HTTPS)
+                                .build()))
+                        .build()))
+                .defaultRootObject(defaultRootObject)
+                .viewerCertificate(ViewerCertificate.fromAcmCertificate(certificate, ViewerCertificateOptions.builder()
+                        .aliases(Collections.singletonList(domainName))
+                        .build()))
+                .build();
+        ARecord.Builder.create(this, project.getName() + "-a-record-" + "-" + subdomain  + "-cloudfront-distribution")
+                .zone(zone)
+                .recordName(domainName)
+                .target(RecordTarget.fromAlias(new CloudFrontTarget(cloudFrontWebDistribution)))
+                .build();
+        return cloudFrontWebDistribution;
     }
 
     private void addEnvironmentVariablesToFunction(Map<String, String> environmentVariables,
@@ -153,11 +209,11 @@ public class AppStack extends Stack {
                 .build();
     }
 
-    private LambdaRestApi createApi(Function function, Certificate cert, IHostedZone zone) {
+    private LambdaRestApi createApi(String subdomain, Function function, Certificate cert, IHostedZone zone) {
         LambdaRestApi api = LambdaRestApi.Builder.create(this, project.getName() + "-lambda-rest-api")
                 .handler(function)
                 .domainName(DomainNameOptions.builder()
-                        .domainName(project.getDomainName())
+                        .domainName(subdomain + "." + project.getDomainName())
                         .certificate(cert)
                         .build())
                 .build();
@@ -297,12 +353,6 @@ public class AppStack extends Stack {
                         .build())
                 .build();
     }
-
-    private Bucket createAssetsBucket() {
-        return Bucket.Builder.create(this, project.getName() + "-assets")
-                .build();
-    }
-
 
     private void addDomain(Certificate cert, IHostedZone zone, UserPool userPool) {
         String domainName = "auth." + project.getDomainName();
