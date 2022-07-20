@@ -8,6 +8,9 @@ repositories {
 }
 
 dependencies {
+    implementation 'software.amazon.awscdk:apigatewayv2-alpha:2.27.0-alpha.0'
+    implementation 'software.amazon.awscdk:apigatewayv2-integrations-alpha:2.27.0-alpha.0'
+
     implementation platform("io.micronaut:micronaut-bom:3.5.2")
     implementation("io.micronaut.aws:micronaut-aws-cdk")
     implementation("software.amazon.awscdk:aws-cdk-lib:2.31.1")

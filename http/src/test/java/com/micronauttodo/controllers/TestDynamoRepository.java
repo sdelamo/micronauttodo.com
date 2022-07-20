@@ -1,7 +1,7 @@
 package com.micronauttodo.controllers;
 
-import com.micronauttodo.persistence.dynamodb.DynamoConfiguration;
-import com.micronauttodo.persistence.dynamodb.DynamoRepository;
+import com.micronauttodo.repositories.dynamodb.DynamoConfiguration;
+import com.micronauttodo.repositories.dynamodb.DynamoRepository;
 import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Singleton;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -19,7 +19,7 @@ import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.util.Arrays;
 
-import static com.micronauttodo.persistence.dynamodb.DynamoRepository.*;
+import static com.micronauttodo.repositories.dynamodb.DynamoRepository.*;
 
 @Singleton
 public class TestDynamoRepository {

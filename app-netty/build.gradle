@@ -11,14 +11,9 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":http"))
-
-    implementation("io.micronaut.aws:micronaut-aws-sdk-v2")
-    implementation("software.amazon.awssdk:dynamodb") {
-        exclude group: "software.amazon.awssdk", module: "apache-client"
-        exclude group: "software.amazon.awssdk", module: "netty-nio-client"
-    }
-    implementation("software.amazon.awssdk:url-connection-client")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly(project(":http"))
+    implementation(project(":dynamodb"))
 }
 
 

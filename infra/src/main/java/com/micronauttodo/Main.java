@@ -7,6 +7,7 @@ import software.amazon.awscdk.StackProps;
 import java.util.List;
 
 public class Main {
+    public final static String MODULE_WEBSOCKETS = "function-lambda-websockets";
     public final static String MODULE_APP = "app-lambda-java";
     public final static String MODULE_APP_GRAALVM = "app-lambda-graalvm";
     public final static String MODULE_FUNCTION_COGNITO_POST_CONFIRMATION = "function-cognito-post-confirmation";
@@ -19,6 +20,7 @@ public class Main {
 
         Project project = new Project(PROJECT_NAME, PROJECT_DOMAIN,
                 List.of(new Module(MODULE_APP, ROOT_PACKAGE),
+                        new Module(MODULE_WEBSOCKETS, ROOT_PACKAGE + ".websockets.handler"),
                         new Module(MODULE_APP_GRAALVM, ROOT_PACKAGE),
                         new Module(MODULE_FUNCTION_COGNITO_POST_CONFIRMATION, ROOT_PACKAGE + ".cognitopostconfirmation")));
 

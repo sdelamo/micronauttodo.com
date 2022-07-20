@@ -1,9 +1,9 @@
 package com.micronauttodo.controllers;
 
-import com.micronauttodo.persistence.OAuthUser;
-import com.micronauttodo.persistence.Todo;
-import com.micronauttodo.persistence.TodoCreate;
-import com.micronauttodo.persistence.TodoSaveService;
+import com.micronauttodo.models.OAuthUser;
+import com.micronauttodo.models.Todo;
+import com.micronauttodo.models.TodoCreate;
+import com.micronauttodo.services.TodoSaveService;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;

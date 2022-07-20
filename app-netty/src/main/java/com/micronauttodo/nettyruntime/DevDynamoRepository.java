@@ -1,7 +1,7 @@
 package com.micronauttodo.nettyruntime;
 
-import com.micronauttodo.persistence.dynamodb.DynamoConfiguration;
-import com.micronauttodo.persistence.dynamodb.DynamoRepository;
+import com.micronauttodo.repositories.dynamodb.DynamoConfiguration;
+import com.micronauttodo.repositories.dynamodb.DynamoRepository;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.annotation.NonNull;
@@ -21,9 +21,9 @@ import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.util.Arrays;
 
-import static com.micronauttodo.persistence.dynamodb.DynamoRepository.ATTRIBUTE_GSI_1_PK;
-import static com.micronauttodo.persistence.dynamodb.DynamoRepository.ATTRIBUTE_GSI_1_SK;
-import static com.micronauttodo.persistence.dynamodb.DynamoRepository.INDEX_GSI_1;
+import static com.micronauttodo.repositories.dynamodb.DynamoRepository.ATTRIBUTE_GSI_1_PK;
+import static com.micronauttodo.repositories.dynamodb.DynamoRepository.ATTRIBUTE_GSI_1_SK;
+import static com.micronauttodo.repositories.dynamodb.DynamoRepository.INDEX_GSI_1;
 
 @Requires(env = Environment.DEVELOPMENT)
 @Singleton

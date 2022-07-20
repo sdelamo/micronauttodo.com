@@ -1,22 +1,20 @@
 package com.micronauttodo.controllers;
 
-import com.micronauttodo.persistence.OAuthUser;
-import com.micronauttodo.persistence.Todo;
-import com.micronauttodo.persistence.TodoRepository;
-import com.micronauttodo.persistence.TodoSaveService;
-import com.micronauttodo.persistence.UserRepository;
+import com.micronauttodo.models.OAuthUser;
+import com.micronauttodo.models.Todo;
+import com.micronauttodo.repositories.TodoRepository;
+import com.micronauttodo.repositories.UserRepository;
+import com.micronauttodo.services.TodoSaveService;
 import io.micronaut.context.annotation.Property;
 import io.micronaut.context.annotation.Replaces;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.convert.ArgumentConversionContext;
-import io.micronaut.core.type.Argument;
 import io.micronaut.core.util.CollectionUtils;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
-import io.micronaut.http.bind.binders.TypedRequestArgumentBinder;
 import io.micronaut.http.client.BlockingHttpClient;
 import io.micronaut.http.client.HttpClient;
 import io.micronaut.http.client.annotation.Client;

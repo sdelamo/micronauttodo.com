@@ -1,6 +1,6 @@
 package com.micronauttodo.views;
 
-import com.micronauttodo.persistence.Todo;
+import com.micronauttodo.models.Todo;
 import io.micronaut.core.annotation.Introspected;
 import java.util.List;
 

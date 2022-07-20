@@ -1,7 +1,8 @@
 package com.micronauttodo.controllers;
 
-import com.micronauttodo.persistence.OAuthUser;
-import com.micronauttodo.persistence.TodoRepository;
+import com.micronauttodo.models.OAuthUser;
+import com.micronauttodo.repositories.TodoRepository;
+import com.micronauttodo.services.TodoDeleteService;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -25,10 +26,10 @@ import javax.validation.constraints.NotBlank;
 @Controller
 class TodoDeleteController {
 
-    private final TodoRepository repository;
+    private final TodoDeleteService todoDeleteService;
 
-    TodoDeleteController(TodoRepository repository) {
-        this.repository = repository;
+    TodoDeleteController(TodoDeleteService todoDeleteService) {
+        this.todoDeleteService = todoDeleteService;
     }
 
     @Hidden
@@ -40,7 +41,7 @@ class TodoDeleteController {
     HttpResponse<?> delete(@NonNull @NotBlank @PathVariable String id,
                            @NonNull OAuthUser oAuthUser,
                            HttpRequest<?> request) {
-        repository.delete(id, oAuthUser);
+        todoDeleteService.delete(id, oAuthUser);
         if (TurboMediaType.acceptsTurboStream(request)) {
             return HttpResponse.ok(TurboStream.builder()
                     .targetDomId("todo-" + id)

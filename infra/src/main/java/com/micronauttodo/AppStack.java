@@ -11,6 +11,10 @@ import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.services.apigateway.DomainNameOptions;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
+import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketApi;
+import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketRouteOptions;
+import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketStage;
+import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.WebSocketLambdaIntegration;
 import software.amazon.awscdk.services.certificatemanager.Certificate;
 import software.amazon.awscdk.services.certificatemanager.CertificateValidation;
 import software.amazon.awscdk.services.cloudfront.Behavior;
@@ -128,7 +132,39 @@ public class AppStack extends Stack {
         Bucket webBucket = createBucket(project.getName() + "-s3-web");
         createCloudFrontDistribution(null, cert, webBucket, zone, "index.html");
 
+        Module websocketsModule = project.findModuleByName(Main.MODULE_WEBSOCKETS);
+        Function websocketsFunction = createFunction(environmentVariables,
+                websocketsModule.getName(),
+                functionHandler(websocketsModule)
+        ).build();
+        WebSocketApi webSocketApi = createWebSocketApi(project.getName(), websocketsFunction);
+        webSocketApi.grantManageConnections(websocketsFunction);
+        WebSocketStage stage = createWebSocketStage(project.getName(), webSocketApi);
+        stage.grantManagementApiAccess(websocketsFunction);
+
         output(api);
+    }
+
+    private WebSocketApi createWebSocketApi(String projectName, Function function) {
+        return WebSocketApi.Builder.create(this, projectName + "-function-api-websocket")
+                .defaultRouteOptions(WebSocketRouteOptions.builder()
+                        .integration((new WebSocketLambdaIntegration("default-route-integration", function)))
+                        .build())
+                .connectRouteOptions(WebSocketRouteOptions.builder()
+                        .integration((new WebSocketLambdaIntegration("connect-route-integration", function)))
+                        .build())
+                .disconnectRouteOptions(WebSocketRouteOptions.builder()
+                        .integration((new WebSocketLambdaIntegration("disconnect-route-integration", function)))
+                        .build())
+                .build();
+    }
+
+    private WebSocketStage createWebSocketStage(String projectName, WebSocketApi webSocketApi) {
+        return WebSocketStage.Builder.create(this, projectName + "-function-api-websocket-stage-production")
+                .webSocketApi(webSocketApi)
+                .stageName("production")
+                .autoDeploy(true)
+                .build();
     }
 
     private Bucket createBucket(String id) {

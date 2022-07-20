@@ -1,0 +1,39 @@
+plugins {
+    id("io.micronaut.library") version "3.5.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+}
+
+version = "0.1"
+group = "example.micronaut"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    implementation("com.amazonaws:aws-lambda-java-events:3.11.0")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+
+    implementation("io.micronaut:micronaut-validation")
+    implementation("io.micronaut.aws:micronaut-function-aws")
+
+    implementation(project(":repositories"))
+    runtimeOnly(project(":dynamodb"))
+    runtimeOnly("ch.qos.logback:logback-classic")
+}
+
+java {
+    sourceCompatibility = JavaVersion.toVersion("11")
+    targetCompatibility = JavaVersion.toVersion("11")
+}
+
+micronaut {
+    runtime("lambda_java")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("example.micronaut.*")
+    }
+}

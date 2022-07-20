@@ -1,8 +1,8 @@
 package com.micronauttodo.cognitopostconfirmation;
 
 import com.amazonaws.services.lambda.runtime.events.CognitoUserPoolPostConfirmationEvent;
-import com.micronauttodo.persistence.OAuthUser;
-import com.micronauttodo.persistence.UserRepository;
+import com.micronauttodo.models.OAuthUser;
+import com.micronauttodo.repositories.UserRepository;
 import io.micronaut.function.aws.MicronautRequestHandler;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;

@@ -12,10 +12,14 @@ repositories {
 
 dependencies {
     implementation(project(":http"))
-    runtimeOnly("ch.qos.logback:logback-classic")
     compileOnly("org.graalvm.nativeimage:svm")
     implementation("io.micronaut.aws:micronaut-function-aws-custom-runtime")
     implementation("io.micronaut:micronaut-http-client")
+
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly(project(":http"))
+    runtimeOnly(project(":apigateway-websockets"))
+    runtimeOnly(project(":dynamodb"))
 }
 
 application {

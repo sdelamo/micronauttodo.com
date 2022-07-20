@@ -1,7 +1,7 @@
 package com.micronauttodo.controllers;
 
-import com.micronauttodo.persistence.OAuthUser;
-import com.micronauttodo.persistence.TodoRepository;
+import com.micronauttodo.models.OAuthUser;
+import com.micronauttodo.repositories.TodoRepository;
 import com.micronauttodo.views.TodoModel;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.annotation.Controller;
@@ -12,9 +12,6 @@ import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.views.View;
 import io.swagger.v3.oas.annotations.Hidden;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
 class TodoListController {

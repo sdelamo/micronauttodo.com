@@ -26,7 +26,7 @@ dependencies {
     implementation("io.micronaut:micronaut-management")
     implementation("io.micronaut.views:micronaut-views-thymeleaf")
 
-    api(project(":persistence"))
+    api(project(":services"))
 
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
     implementation("io.micronaut.security:micronaut-security-jwt")

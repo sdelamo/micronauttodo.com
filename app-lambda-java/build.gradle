@@ -12,7 +12,11 @@ repositories {
 
 dependencies {
     implementation("io.micronaut.aws:micronaut-function-aws-api-proxy")
-    implementation(project(":http"))
+
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly(project(":http"))
+    runtimeOnly(project(":apigateway-websockets"))
+    runtimeOnly(project(":dynamodb"))
 }
 
 application {

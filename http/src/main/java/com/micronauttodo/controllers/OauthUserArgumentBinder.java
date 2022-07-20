@@ -1,6 +1,6 @@
 package com.micronauttodo.controllers;
 
-import com.micronauttodo.persistence.OAuthUser;
+import com.micronauttodo.models.OAuthUser;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.convert.ArgumentConversionContext;
