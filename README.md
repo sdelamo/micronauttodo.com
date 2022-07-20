@@ -18,6 +18,8 @@ One lambda is deployed a [GraalVM](https://www.graalvm.org) native executable us
 
 ![](architecture1.jpeg)
 
+![](architecture2.jpeg)
+
 ## Modules
 
 ![](modules.jpeg)
