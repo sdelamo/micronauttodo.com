@@ -14,6 +14,8 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Produces;
 import io.micronaut.http.uri.UriBuilder;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.views.turbo.TurboStream;
@@ -36,6 +38,7 @@ public class TodoSaveController {
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @Produces(MediaType.TEXT_HTML)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @ExecuteOn(TaskExecutors.IO)
     @Post("/todo")
     HttpResponse<?> save(//@NonNull @NotNull @Valid TodoCreate todo,
                          @NonNull @NotBlank String task,

@@ -34,6 +34,12 @@
                     <a class="nav-link active" href="/oauth/login/cognito" th:text="#{login}"></a>
                 </li>
                 <li class="nav-item" th:if="${email}">
+                    <a class="nav-link active" href="/user" th:text="#{profile}"></a>
+                </li>
+                <li class="nav-item" th:if="${email}">
+                    <a class="nav-link active" href="/todo" th:text="#{todo.list}"></a>
+                </li>
+                <li class="nav-item" th:if="${email}">
                     <a class="nav-link active" href="/oauth/logout" th:text="#{logout}"></a>
                 </li>
             </ul>

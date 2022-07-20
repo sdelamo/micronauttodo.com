@@ -6,14 +6,13 @@ import com.micronauttodo.persistence.TodoRepository;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Optional;
 
 @Requires(beans = { DynamoConfiguration.class, DynamoDbClient.class })
 @Singleton
@@ -40,6 +39,13 @@ public class TodoRepositoryDynamo extends DynamoRepository implements TodoReposi
     public List<Todo> findAll(@NonNull @NotNull @Valid OAuthUser oAuthUser) {
         Class<?> cls = Todo.class;
         return findAll(cls, oAuthUser);
+    }
+
+    @Override
+    @NonNull
+    public Optional<Todo> findById(@NonNull @NotBlank String id,
+                                   @NonNull @NotNull @Valid OAuthUser user) {
+        return find(Todo.class, new TodoItemKey(id, user).toKey());
     }
 
     public List<Todo> findAll(@NonNull Class<?> cls,

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" th:replace="~{layout :: layout(~{::title},~{::script},~{::main})}" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title th:text="${email}"></title>
+        <script></script>
+    </head>
+    <body>
+        <main>
+            <table class="table table-striped table-responsive">
+                <tbody>
+                    <tr>
+                        <th th:text="#{user.email}"></th>
+                        <td th:text="${email}"></td>
+                    </tr>
+                    <tr>
+                        <th th:text="#{user.accessToken}"></th>
+                        <td th:text="${accessToken}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </body>
+</html>

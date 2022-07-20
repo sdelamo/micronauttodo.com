@@ -13,6 +13,8 @@ import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Produces;
 import io.micronaut.http.uri.UriBuilder;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.views.turbo.TurboStream;
@@ -34,6 +36,7 @@ class TodoDeleteController {
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_HTML)
+    @ExecuteOn(TaskExecutors.IO)
     HttpResponse<?> delete(@NonNull @NotBlank @PathVariable String id,
                            @NonNull OAuthUser oAuthUser,
                            HttpRequest<?> request) {

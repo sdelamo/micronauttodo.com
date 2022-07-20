@@ -1,5 +1,6 @@
 package com.micronauttodo.persistence.dynamodb;
 
+import com.micronauttodo.persistence.Todo;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.beans.BeanIntrospection;
@@ -54,6 +55,18 @@ public abstract class DynamoRepository {
             }
             LOG.trace("****************************");
         }
+    }
+
+    @NonNull
+    protected <T> Optional<T> find(@NonNull Class<T> cls,
+                                   @NonNull Map<String, AttributeValue> key) {
+        GetItemResponse itemResponse = dynamoDbClient.getItem(GetItemRequest.builder()
+                .tableName(dynamoConfiguration.getTableName())
+                .key(key)
+                .build());
+        return (itemResponse.hasItem()) ?
+                Optional.of(fromItem(cls, itemResponse.item())) :
+                Optional.empty();
     }
 
     protected QueryRequest findAllQueryRequest(@NonNull String pk,
