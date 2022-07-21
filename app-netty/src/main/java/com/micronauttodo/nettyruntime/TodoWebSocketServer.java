@@ -6,6 +6,8 @@ import com.micronauttodo.utils.OauthUserUtils;
 import com.micronauttodo.utils.WritableUtils;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.io.Writable;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.security.token.jwt.validator.JwtTokenValidator;
 import io.micronaut.views.turbo.TurboStream;
 import io.micronaut.views.turbo.TurboStreamRenderer;
@@ -29,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
+@Secured(SecurityRule.IS_AUTHENTICATED)
 @ServerWebSocket("/todo{?token}")
 class TodoWebSocketServer implements WebsocketsTurboStreamPublisher {
     private static final Logger LOG = LoggerFactory.getLogger(TodoWebSocketServer.class);

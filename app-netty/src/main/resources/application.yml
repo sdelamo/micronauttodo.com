@@ -8,10 +8,18 @@ micronaut:
       assets:
         paths: 'classpath:assets'
         mapping: '/assets/**'
-
 ---
 micronaut:
   security:
+    redirect:
+      forbidden:
+        url: '/forbidden'
+      unauthorized:
+        url: '/oauth/login/cognito'
+    authentication: idtoken
+    endpoints:
+      logout:
+        get-allowed: true
     intercept-url-map:
       -
         http-method: GET

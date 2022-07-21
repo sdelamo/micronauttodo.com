@@ -3,8 +3,10 @@ package com.micronauttodo.controllers;
 import com.micronauttodo.views.UserModel;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Produces;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
@@ -27,6 +29,7 @@ class UserShowController {
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @Get("/user")
     @View("user/show.html")
+    @Produces(MediaType.TEXT_HTML)
     @ExecuteOn(TaskExecutors.IO)
     HttpResponse<?> show(HttpRequest<?> request) {
         return tokenReader.findToken(request)

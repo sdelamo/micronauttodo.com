@@ -3,7 +3,7 @@
     <head>
         <title th:text="#{todo.list}"></title>
         <script type="module">
-        const wsUrl = ((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/chat/[[${room.id}]]";
+        const wsUrl = ((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/todo?token=[[${accessToken}]]";
         const socket = new WebSocket(wsUrl);
         socket.addEventListener('open', function (event) {
             console.log(event);

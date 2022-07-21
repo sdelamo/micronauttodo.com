@@ -1,5 +1,11 @@
 micronaut:
   security:
+    redirect:
+      forbidden:
+        url: '/forbidden'
+      unauthorized:
+        url: '/oauth/login/cognito'
+    authentication: idtoken
     endpoints:
       logout:
         get-allowed: true
@@ -10,7 +16,3 @@ micronaut:
           client-secret: ${OAUTH_CLIENT_SECRET}
           openid:
             issuer: https://cognito-idp.${COGNITO_REGION}.amazonaws.com/${COGNITO_POOL_ID}/
-    authentication: idtoken
-    redirect:
-      unauthorized:
-        url: '/unauthorized'
