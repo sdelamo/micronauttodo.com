@@ -49,12 +49,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
     testRuntimeOnly("ch.qos.logback:logback-classic")
 
-    testImplementation("io.micronaut.aws:micronaut-aws-sdk-v2")
-    testImplementation "software.amazon.awssdk:dynamodb", {
-        exclude group: "software.amazon.awssdk", module: "apache-client"
-        exclude group: "software.amazon.awssdk", module: "netty-nio-client"
-    }
-    testImplementation "software.amazon.awssdk:url-connection-client"
+    testImplementation(project(":dynamodb"))
 }
 
 task copyJsControllers(type: Copy) {
