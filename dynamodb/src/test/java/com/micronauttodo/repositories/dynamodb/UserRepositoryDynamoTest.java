@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @MicronautTest
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @TestInstance(PER_CLASS)
 class UserRepositoryDynamoTest implements TestPropertyProvider {
 

@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @Property(name = "micronaut.security.filter.enabled", value = StringUtils.FALSE)
 @Property(name = "micronaut.http.client.follow-redirects", value = StringUtils.FALSE)
 @MicronautTest
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @TestInstance(PER_CLASS)
 class TodoSaveControllerTest implements TestPropertyProvider {
 
