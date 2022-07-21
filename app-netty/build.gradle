@@ -19,6 +19,13 @@ dependencies {
     implementation("io.micronaut.views:micronaut-views-core")
 }
 
+task copyJsControllers(type: Copy) {
+    from '../assets/assets/javascripts/controllers'
+    into 'src/main/resources/assets/javascripts/controllers'
+}
+tasks.named('processResources') {
+    it.dependsOn('copyJsControllers')
+}
 
 application {
     mainClass.set("com.micronauttodo.nettyruntime.Application")

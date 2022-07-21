@@ -15,5 +15,5 @@ out/
 *.json
 infra/cdk.out
 application-dev.yml
-http/src/main/resources/assets/javascripts/controllers/*.mjs
+app-netty/src/main/resources/assets/javascripts/controllers/*.mjs
 openapi/*.yml

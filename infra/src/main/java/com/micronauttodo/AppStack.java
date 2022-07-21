@@ -58,6 +58,8 @@ import software.amazon.awscdk.services.route53.RecordTarget;
 import software.amazon.awscdk.services.route53.targets.ApiGateway;
 import software.amazon.awscdk.services.route53.targets.CloudFrontTarget;
 import software.amazon.awscdk.services.s3.Bucket;
+import software.amazon.awscdk.services.s3.deployment.BucketDeployment;
+import software.amazon.awscdk.services.s3.deployment.Source;
 import software.amazon.awscdk.services.ses.CfnEmailIdentity;
 import software.constructs.Construct;
 
@@ -117,7 +119,8 @@ public class AppStack extends Stack {
         Function functionNative = createAppFunction(environmentVariables, appModuleNative.getName(), true).build();
         table.grantReadWriteData(functionNative);
 
-        LambdaRestApi api = createApi("webapp", functionNative, cert, zone);
+        String subdomain = "webapp";
+        LambdaRestApi api = createApi(subdomain, functionNative, cert, zone);
 
         Module postConfirmationModule = project.findModuleByName(Main.MODULE_FUNCTION_COGNITO_POST_CONFIRMATION);
         Function postConfirmationFunction = createFunction(environmentVariables,
@@ -126,17 +129,20 @@ public class AppStack extends Stack {
                 ).build();
         table.grantReadWriteData(postConfirmationFunction);
 
-        environmentVariables = createAuthorizationServer(cert, zone, postConfirmationFunction);
+        environmentVariables = createAuthorizationServer(cert, zone, postConfirmationFunction, HTTPS + subdomain + "." + project.getDomainName());
         addEnvironmentVariablesToFunction(environmentVariables, function);
         addEnvironmentVariablesToFunction(environmentVariables, functionNative);
 
         Bucket openApiBucket = createBucket(project.getName() + "-s3-openapi");
+        createBucketDeployment(openApiBucket, "openapi");
         createCloudFrontDistribution("openapi", cert, openApiBucket, zone, "micronaut-todo-1.0.yml");
 
         Bucket assetsBucket = createBucket(project.getName() + "-s3-assets");
+        createBucketDeployment(assetsBucket, "assets");
         createCloudFrontDistribution("assets", cert, assetsBucket, zone, "index.html");
 
         Bucket webBucket = createBucket(project.getName() + "-s3-web");
+        createBucketDeployment(webBucket, "web");
         createCloudFrontDistribution(null, cert, webBucket, zone, "index.html");
 
         Module websocketsModule = project.findModuleByName(Main.MODULE_WEBSOCKETS);
@@ -150,6 +156,13 @@ public class AppStack extends Stack {
         stage.grantManagementApiAccess(websocketsFunction);
 
         output(api);
+    }
+
+    private void createBucketDeployment(Bucket bucket, String moduleName) {
+        BucketDeployment.Builder.create(this, project.getName() + "-s3-deployment-" + moduleName)
+                .sources(Collections.singletonList(Source.asset("../"+ moduleName)))
+                .destinationBucket(bucket)
+                .build();
     }
 
     private WebSocketApi createWebSocketApi(String projectName, Function function) {
@@ -190,7 +203,7 @@ public class AppStack extends Stack {
                 .originConfigs(Collections.singletonList(SourceConfiguration.builder()
                         .s3OriginSource(S3OriginConfig.builder()
                                 .s3BucketSource(bucket)
-                                .originAccessIdentity(OriginAccessIdentity.Builder.create(this, project.getName() + "-origin-access-identity")
+                                .originAccessIdentity(OriginAccessIdentity.Builder.create(this, project.getName() + "-" + subdomain + "-origin-access-identity")
                                         .build())
                                 .build())
                         .behaviors(Collections.singletonList(Behavior.builder()
@@ -261,8 +274,11 @@ public class AppStack extends Stack {
                         .build())
                 .build();
 
+        String domainName = subdomain != null ?
+                subdomain + "." + project.getDomainName() : project.getDomainName();
         ARecord.Builder.create(this, project.getName() + "-a-record-lambda-rest-api")
                 .zone(zone)
+                .recordName(domainName)
                 .target(RecordTarget.fromAlias(new ApiGateway(api)))
                 .build();
         return api;
@@ -270,13 +286,15 @@ public class AppStack extends Stack {
 
     private Map<String, String> createAuthorizationServer(Certificate cert,
                                                           IHostedZone zone,
-                                                          Function postConfirmationFunction) {
+                                                          Function postConfirmationFunction,
+                                                          String webappDomainName) {
         UserPool userPool = createUserPool(cert, zone, postConfirmationFunction);
-        UserPoolClient userPoolClient = createUserPoolClient(userPool);
+        UserPoolClient userPoolClient = createUserPoolClient(webappDomainName, userPool);
+
         return Map.of("COGNITO_POOL_ID", userPool.getUserPoolId(),
                 "COGNITO_REGION", "us-east-1",
-                    "OAUTH_CLIENT_ID", userPoolClient.getUserPoolClientId(),
-                    "OAUTH_CLIENT_SECRET", getUserPoolClientSecret(userPool, userPoolClient));
+                    "OAUTH_CLIENT_ID", userPoolClient.getUserPoolClientId()
+        ); //, "OAUTH_CLIENT_SECRET", getUserPoolClientSecret(userPool, userPoolClient));
 
     }
 
@@ -435,7 +453,7 @@ public class AppStack extends Stack {
                 .build();
     }
 
-    private UserPoolClient createUserPoolClient(UserPool userPool) {
+    private UserPoolClient createUserPoolClient(String webappDomainName, UserPool userPool) {
         UserPoolClientOptions clientOptions = UserPoolClientOptions.builder()
                 .generateSecret(true)
                 .oAuth(OAuthSettings.builder()
@@ -445,10 +463,10 @@ public class AppStack extends Stack {
                         .flows(OAuthFlows.builder()
                                 .authorizationCodeGrant(true)
                                 .build())
-                        .callbackUrls(Stream.of(HTTPS + project.getDomainName(), LOCALHOST)
+                        .callbackUrls(Stream.of(webappDomainName, LOCALHOST)
                                 .map(domain -> domain + "/oauth/callback/" + OAUTH_CLIENT_NAME)
                                 .collect(Collectors.toList()))
-                        .logoutUrls(Stream.of(HTTPS + project.getDomainName(), LOCALHOST)
+                        .logoutUrls(Stream.of(webappDomainName, LOCALHOST)
                                 .map(domain -> domain + "/logout")
                                 .collect(Collectors.toList()))
                         .build())

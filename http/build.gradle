@@ -52,13 +52,7 @@ dependencies {
     testImplementation(project(":dynamodb"))
 }
 
-task copyJsControllers(type: Copy) {
-    from '../assets/javascripts/controllers'
-    into 'src/main/resources/assets/javascripts/controllers'
-}
-tasks.named('processResources') {
-    it.dependsOn('copyJsControllers')
-}
+
 task copyOpenApi(type: Copy) {
     from 'build/classes/java/main/META-INF/swagger/micronaut-todo-1.0.yml'
     into '../openapi'
