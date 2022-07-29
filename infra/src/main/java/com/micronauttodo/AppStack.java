@@ -14,6 +14,7 @@ import software.amazon.awscdk.customresources.AwsCustomResourcePolicy;
 import software.amazon.awscdk.customresources.AwsSdkCall;
 import software.amazon.awscdk.customresources.PhysicalResourceId;
 import software.amazon.awscdk.customresources.SdkCallsPolicyOptions;
+import software.amazon.awscdk.services.apigateway.DomainName;
 import software.amazon.awscdk.services.apigateway.DomainNameOptions;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
 import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketApi;
@@ -56,6 +57,7 @@ import software.amazon.awscdk.services.route53.HostedZoneProviderProps;
 import software.amazon.awscdk.services.route53.IHostedZone;
 import software.amazon.awscdk.services.route53.RecordTarget;
 import software.amazon.awscdk.services.route53.targets.ApiGateway;
+import software.amazon.awscdk.services.route53.targets.ApiGatewayDomain;
 import software.amazon.awscdk.services.route53.targets.CloudFrontTarget;
 import software.amazon.awscdk.services.s3.Bucket;
 import software.amazon.awscdk.services.s3.deployment.BucketDeployment;
@@ -151,11 +153,27 @@ public class AppStack extends Stack {
                 functionHandler(websocketsModule)
         ).build();
         WebSocketApi webSocketApi = createWebSocketApi(project.getName(), websocketsFunction);
+        createWebSocketApiDomain("websockets." + project.getDomainName(),
+                project.getName() + "-apigateway-websockets-domainname",
+                cert,
+                zone);
         webSocketApi.grantManageConnections(websocketsFunction);
         WebSocketStage stage = createWebSocketStage(project.getName(), webSocketApi);
         stage.grantManagementApiAccess(websocketsFunction);
 
         output(api);
+    }
+
+    void createWebSocketApiDomain(String domain, String id, Certificate cert, IHostedZone zone) {
+        DomainName domainName = DomainName.Builder.create(this, id)
+                .certificate(cert)
+                .domainName(domain)
+                .build();
+        ARecord.Builder.create(this, project.getName() + "-a-record-websockets-api")
+                .zone(zone)
+                .recordName(domain)
+                .target(RecordTarget.fromAlias(new ApiGatewayDomain(domainName)))
+                .build();
     }
 
     private void createBucketDeployment(Bucket bucket, String moduleName) {
@@ -283,6 +301,7 @@ public class AppStack extends Stack {
                 .build();
         return api;
     }
+
 
     private Map<String, String> createAuthorizationServer(Certificate cert,
                                                           IHostedZone zone,
