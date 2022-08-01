@@ -1,0 +1,10 @@
+plugins {
+    id 'com.micronauttodo.build.internal.lib-module'
+}
+dependencies {
+    annotationProcessor("io.micronaut.data:micronaut-data-processor")
+    implementation(project(":repositories-data-entities"))
+    implementation("io.micronaut.data:micronaut-data-jdbc")
+    implementation(project(":repositories"))
+
+}

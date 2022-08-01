@@ -19,7 +19,7 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly(project(":http"))
     runtimeOnly(project(":apigateway-websockets"))
-    runtimeOnly(project(":dynamodb"))
+    runtimeOnly(project(":repositories-dynamo"))
 }
 
 application {

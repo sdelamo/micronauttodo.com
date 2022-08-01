@@ -1,0 +1,13 @@
+plugins {
+    id 'com.micronauttodo.build.internal.http-test-module'
+}
+
+dependencies {
+    testImplementation(project(":repositories-data-jdbc-mysql"))
+
+    testImplementation("io.micronaut.data:micronaut-data-jdbc")
+    testImplementation("io.micronaut.sql:micronaut-jdbc-hikari")
+
+    testRuntimeOnly("mysql:mysql-connector-java")
+    testImplementation("org.testcontainers:mysql")
+}

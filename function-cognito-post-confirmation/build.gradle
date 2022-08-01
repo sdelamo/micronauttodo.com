@@ -17,7 +17,7 @@ dependencies {
     implementation("io.micronaut.aws:micronaut-function-aws")
 
     implementation(project(":repositories"))
-    runtimeOnly(project(":dynamodb"))
+    runtimeOnly(project(":repositories-dynamo"))
     runtimeOnly("ch.qos.logback:logback-classic")
 }
 
