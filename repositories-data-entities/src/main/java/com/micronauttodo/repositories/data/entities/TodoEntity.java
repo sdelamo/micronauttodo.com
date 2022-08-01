@@ -4,13 +4,9 @@ import io.micronaut.core.annotation.NonNull;
 import io.micronaut.data.annotation.Id;
 import io.micronaut.data.annotation.MappedEntity;
 import io.micronaut.data.annotation.Relation;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-
 import javax.validation.constraints.NotBlank;
 
-@Table(name = "todo")
-@Entity
+@MappedEntity("todo")
 public class TodoEntity {
 
     @Id

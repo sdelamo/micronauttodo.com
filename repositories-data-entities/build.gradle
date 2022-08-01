@@ -4,6 +4,5 @@ plugins {
 dependencies {
     annotationProcessor("io.micronaut.data:micronaut-data-processor")
     implementation("io.micronaut.data:micronaut-data-model")
-    implementation("jakarta.persistence:jakarta.persistence-api:3.0.0")
     implementation(project(":models"))
 }

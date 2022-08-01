@@ -2,7 +2,6 @@ package com.micronauttodo.repositories.data.entities;
 
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.data.annotation.Embeddable;
-
 import javax.validation.constraints.NotBlank;
 
 @Embeddable

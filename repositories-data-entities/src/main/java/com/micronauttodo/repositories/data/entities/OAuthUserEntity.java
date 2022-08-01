@@ -2,12 +2,10 @@ package com.micronauttodo.repositories.data.entities;
 
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.data.annotation.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import io.micronaut.data.annotation.MappedEntity;
 import javax.validation.constraints.Email;
 
-@Table(name = "user")
-@Entity
+@MappedEntity("user")
 public class OAuthUserEntity {
 
     @EmbeddedId
