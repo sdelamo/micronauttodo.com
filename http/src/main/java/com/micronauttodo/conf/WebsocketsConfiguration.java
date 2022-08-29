@@ -11,7 +11,6 @@ import javax.validation.constraints.Pattern;
 @ConfigurationProperties("websockets")
 public interface WebsocketsConfiguration {
     @NotBlank
-    @Pattern(regexp = "https://.*")
     @NonNull
     String getUrl();
 }

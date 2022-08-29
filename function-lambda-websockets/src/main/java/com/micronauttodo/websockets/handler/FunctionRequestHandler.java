@@ -19,6 +19,7 @@ import java.util.Optional;
 
 public class FunctionRequestHandler extends MicronautRequestHandler<APIGatewayV2WebSocketEvent, APIGatewayV2WebSocketResponse> {
 
+    public static final String QUERY_STRING_PARAM_TOKEN = "token";
     @Inject
     WebSocketConnectionRepository repository;
 
@@ -30,7 +31,9 @@ public class FunctionRequestHandler extends MicronautRequestHandler<APIGatewayV2
     @Override
     public APIGatewayV2WebSocketResponse execute(APIGatewayV2WebSocketEvent input) {
         LOG.info("input {}", input);
-        processWebSocketEvent(input);
+        if (input != null) {
+            processWebSocketEvent(input);
+        }
         APIGatewayV2WebSocketResponse response = new APIGatewayV2WebSocketResponse();
         response.setStatusCode(200);
         return response;
@@ -56,7 +59,13 @@ public class FunctionRequestHandler extends MicronautRequestHandler<APIGatewayV2
     @NonNull
     private Optional<OAuthUser> userOfInput(@NonNull APIGatewayV2WebSocketEvent input) {
         try {
-            String token = input.getQueryStringParameters().get("JWT");
+            if (input.getQueryStringParameters() == null) {
+                return Optional.empty();
+            }
+            String token = input.getQueryStringParameters().get(QUERY_STRING_PARAM_TOKEN);
+            if (token == null) {
+                return Optional.empty();
+            }
             return Optional.of(userOfToken(token));
         } catch (JsonProcessingException e) {
             return Optional.empty();

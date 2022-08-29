@@ -3,7 +3,7 @@
     <head>
         <title th:text="#{todo.list}"></title>
         <script type="module">
-        const wsUrl = ((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/todo?token=[[${accessToken}]]";
+        const wsUrl = ((window.location.protocol === "https:") ? "wss://" : "ws://") + "[[${websocketsUrl}]]" + "/todo?token=[[${accessToken}]]";
         const socket = new WebSocket(wsUrl);
         socket.addEventListener('open', function (event) {
             console.log(event);
@@ -13,7 +13,6 @@
     </script>
     </head>
     <body>
-
         <main>
             <h1 th:text="#{todo.list}"></h1>
             <table th:replace="~{todo/_table :: table(${todos})}"></table>

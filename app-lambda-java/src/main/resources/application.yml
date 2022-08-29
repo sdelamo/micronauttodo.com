@@ -9,3 +9,5 @@ netty:
 ---
 assets:
   url: 'https://assets.micronauttodo.com'
+websockets:
+  url: 'websockets.micronauttodo.com'

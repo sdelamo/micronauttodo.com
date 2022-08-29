@@ -17,6 +17,7 @@ import software.amazon.awscdk.customresources.SdkCallsPolicyOptions;
 import software.amazon.awscdk.services.apigateway.DomainName;
 import software.amazon.awscdk.services.apigateway.DomainNameOptions;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
+import software.amazon.awscdk.services.apigatewayv2.alpha.DomainMappingOptions;
 import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketApi;
 import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketRouteOptions;
 import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketStage;
@@ -60,6 +61,7 @@ import software.amazon.awscdk.services.route53.IHostedZone;
 import software.amazon.awscdk.services.route53.RecordTarget;
 import software.amazon.awscdk.services.route53.targets.ApiGateway;
 import software.amazon.awscdk.services.route53.targets.ApiGatewayDomain;
+import software.amazon.awscdk.services.route53.targets.ApiGatewayv2DomainProperties;
 import software.amazon.awscdk.services.route53.targets.CloudFrontTarget;
 import software.amazon.awscdk.services.s3.Bucket;
 import software.amazon.awscdk.services.s3.CorsRule;
@@ -112,17 +114,13 @@ public class AppStack extends Stack {
         Certificate cert = createCertificate(zone);
 
         Table table = createTable();
-        Map<String, String> environmentVariables = new HashMap<>();
-        environmentVariables.put("DYNAMODB_TABLE_NAME", table.getTableName());
-        // https://aws.amazon.com/blogs/compute/optimizing-aws-lambda-function-performance-for-java/
-        environmentVariables.put("JAVA_TOOL_OPTIONS", "-XX:+TieredCompilation -XX:TieredStopAtLevel=1");
 
         Module appModule = project.findModuleByName(Main.MODULE_APP);
-        Function function = createAppFunction(environmentVariables, appModule.getName()).build();
+        Function function = createAppFunction(environmentVariables(table), appModule.getName()).build();
         table.grantReadWriteData(function);
 
         Module appModuleNative = project.findModuleByName(Main.MODULE_APP_GRAALVM);
-        Function functionNative = createAppFunction(environmentVariables, appModuleNative.getName(), true).build();
+        Function functionNative = createAppFunction(environmentVariables(table), appModuleNative.getName(), true).build();
         table.grantReadWriteData(functionNative);
 
         String subdomain = "webapp";
@@ -130,14 +128,14 @@ public class AppStack extends Stack {
         LambdaRestApi api = createApi(subdomain, functionNative, cert, zone);
 
         Module postConfirmationModule = project.findModuleByName(Main.MODULE_FUNCTION_COGNITO_POST_CONFIRMATION);
-        Function postConfirmationFunction = createFunction(environmentVariables,
+        Function postConfirmationFunction = createFunction(environmentVariables(table),
                 postConfirmationModule.getName(),
                 functionHandler(postConfirmationModule)
                 ).build();
         table.grantReadWriteData(postConfirmationFunction);
 
         String webappDomainName = HTTPS + subdomain + "." + project.getDomainName();
-        environmentVariables = createAuthorizationServer(cert, zone, postConfirmationFunction, webappDomainName);
+        Map<String, String> environmentVariables = createAuthorizationServer(cert, zone, postConfirmationFunction, webappDomainName);
         addEnvironmentVariablesToFunction(environmentVariables, function);
         addEnvironmentVariablesToFunction(environmentVariables, functionNative);
 
@@ -155,20 +153,28 @@ public class AppStack extends Stack {
         createCloudFrontDistribution(null, cert, webBucket, zone, "index.html");
 
         Module websocketsModule = project.findModuleByName(Main.MODULE_WEBSOCKETS);
-        Function websocketsFunction = createFunction(environmentVariables,
+        Function websocketsFunction = createFunction(environmentVariables(table),
                 websocketsModule.getName(),
                 functionHandler(websocketsModule)
         ).build();
         WebSocketApi webSocketApi = createWebSocketApi(project.getName(), websocketsFunction);
-        createWebSocketApiDomain("websockets." + project.getDomainName(),
+        software.amazon.awscdk.services.apigatewayv2.alpha.DomainName webSocketApiDomain =  createWebSocketApiDomain("websockets." + project.getDomainName(),
                 project.getName() + "-apigateway-websockets-domainname",
                 cert,
                 zone);
         webSocketApi.grantManageConnections(websocketsFunction);
-        WebSocketStage stage = createWebSocketStage(project.getName(), webSocketApi);
+        WebSocketStage stage = createWebSocketStage(project.getName(), webSocketApi, webSocketApiDomain);
         stage.grantManagementApiAccess(websocketsFunction);
-
         output(api);
+    }
+
+
+    private static Map<String, String> environmentVariables(Table table) {
+        Map<String, String> environmentVariables = new HashMap<>();
+        environmentVariables.put("DYNAMODB_TABLE_NAME", table.getTableName());
+        // https://aws.amazon.com/blogs/compute/optimizing-aws-lambda-function-performance-for-java/
+        environmentVariables.put("JAVA_TOOL_OPTIONS", "-XX:+TieredCompilation -XX:TieredStopAtLevel=1");
+        return  environmentVariables;
     }
 
     private void addCorsRule(Bucket bucket, String allowedOrigin) {
@@ -179,23 +185,30 @@ public class AppStack extends Stack {
                 .build());
     }
 
-    void createWebSocketApiDomain(String domain, String id, Certificate cert, IHostedZone zone) {
-        DomainName domainName = DomainName.Builder.create(this, id)
-                .certificate(cert)
-                .domainName(domain)
-                .build();
-        ARecord.Builder.create(this, project.getName() + "-a-record-websockets-api")
-                .zone(zone)
-                .recordName(domain)
-                .target(RecordTarget.fromAlias(new ApiGatewayDomain(domainName)))
-                .build();
-    }
-
     private void createBucketDeployment(Bucket bucket, String moduleName) {
         BucketDeployment.Builder.create(this, project.getName() + "-s3-deployment-" + moduleName)
                 .sources(Collections.singletonList(Source.asset("../"+ moduleName)))
                 .destinationBucket(bucket)
                 .build();
+    }
+
+    software.amazon.awscdk.services.apigatewayv2.alpha.DomainName createWebSocketApiDomain(String domain,
+                                                                                           String id,
+                                                                                           Certificate cert,
+                                                                                           IHostedZone zone) {
+        software.amazon.awscdk.services.apigatewayv2.alpha.DomainName domainName =
+                software.amazon.awscdk.services.apigatewayv2.alpha.DomainName.Builder.create(this, id)
+                .certificate(cert)
+                .domainName(domain)
+                .build();
+        ApiGatewayv2DomainProperties domainProperties =
+                new ApiGatewayv2DomainProperties(domainName.getRegionalDomainName(), domainName.getRegionalHostedZoneId());
+        ARecord.Builder.create(this, project.getName() + "-a-record-websockets-api")
+                .zone(zone)
+                .recordName(domain)
+                .target(RecordTarget.fromAlias(domainProperties))
+                .build();
+        return domainName;
     }
 
     private WebSocketApi createWebSocketApi(String projectName, Function function) {
@@ -212,11 +225,16 @@ public class AppStack extends Stack {
                 .build();
     }
 
-    private WebSocketStage createWebSocketStage(String projectName, WebSocketApi webSocketApi) {
+    private WebSocketStage createWebSocketStage(String projectName,
+                                                WebSocketApi webSocketApi,
+                                                software.amazon.awscdk.services.apigatewayv2.alpha.DomainName domainName) {
         return WebSocketStage.Builder.create(this, projectName + "-function-api-websocket-stage-production")
                 .webSocketApi(webSocketApi)
                 .stageName("production")
                 .autoDeploy(true)
+                .domainMapping(DomainMappingOptions.builder()
+                        .domainName(domainName)
+                        .build())
                 .build();
     }
 
@@ -260,12 +278,12 @@ public class AppStack extends Stack {
 
     private void addEnvironmentVariablesToFunction(Map<String, String> environmentVariables,
                                                    Function function) {
-        for (String k : environmentVariables.keySet()) {
-            String value =  environmentVariables.get(k);
+        environmentVariables.keySet().forEach(k -> {
+            String value = environmentVariables.get(k);
             if (StringUtils.isNotEmpty(value)) {
                 function.addEnvironment(k, value);
             }
-        }
+        });
     }
 
     private String functionHandler(Module module) {

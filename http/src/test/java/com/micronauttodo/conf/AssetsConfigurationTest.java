@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Property(name = "assets.url", value = "https://assets.microanuttodo.com")
+@Property(name = "assets.url", value = "https://assets.micronauttodo.com")
 @MicronautTest(startApplication = false)
 class AssetsConfigurationTest {
 
@@ -22,6 +22,6 @@ class AssetsConfigurationTest {
 
     @Test
     void immutableConfigurationViaProperty(AssetsConfiguration assetsConfiguration) {
-        assertEquals("https://assets.microanuttodo.com", assetsConfiguration.getUrl());
+        assertEquals("https://assets.micronauttodo.com", assetsConfiguration.getUrl());
     }
 }
