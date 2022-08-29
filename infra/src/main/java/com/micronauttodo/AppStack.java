@@ -14,7 +14,6 @@ import software.amazon.awscdk.customresources.AwsCustomResourcePolicy;
 import software.amazon.awscdk.customresources.AwsSdkCall;
 import software.amazon.awscdk.customresources.PhysicalResourceId;
 import software.amazon.awscdk.customresources.SdkCallsPolicyOptions;
-import software.amazon.awscdk.services.apigateway.DomainName;
 import software.amazon.awscdk.services.apigateway.DomainNameOptions;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
 import software.amazon.awscdk.services.apigatewayv2.alpha.DomainMappingOptions;
@@ -25,7 +24,6 @@ import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.WebSocket
 import software.amazon.awscdk.services.certificatemanager.Certificate;
 import software.amazon.awscdk.services.certificatemanager.CertificateValidation;
 import software.amazon.awscdk.services.cloudfront.Behavior;
-import software.amazon.awscdk.services.cloudfront.CloudFrontAllowedCachedMethods;
 import software.amazon.awscdk.services.cloudfront.CloudFrontAllowedMethods;
 import software.amazon.awscdk.services.cloudfront.CloudFrontWebDistribution;
 import software.amazon.awscdk.services.cloudfront.OriginAccessIdentity;
@@ -60,7 +58,6 @@ import software.amazon.awscdk.services.route53.HostedZoneProviderProps;
 import software.amazon.awscdk.services.route53.IHostedZone;
 import software.amazon.awscdk.services.route53.RecordTarget;
 import software.amazon.awscdk.services.route53.targets.ApiGateway;
-import software.amazon.awscdk.services.route53.targets.ApiGatewayDomain;
 import software.amazon.awscdk.services.route53.targets.ApiGatewayv2DomainProperties;
 import software.amazon.awscdk.services.route53.targets.CloudFrontTarget;
 import software.amazon.awscdk.services.s3.Bucket;
@@ -80,6 +77,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static software.amazon.awscdk.customresources.AwsCustomResourcePolicy.ANY_RESOURCE;
+import static com.micronauttodo.repositories.dynamodb.constants.DynamoDbConstants.*;
 
 public class AppStack extends Stack {
 
@@ -87,17 +85,6 @@ public class AppStack extends Stack {
 
     private final static String LOCALHOST = "http://localhost:8080";
 
-    protected static final String ATTRIBUTE_PK = "pk";
-    protected static final String ATTRIBUTE_SK = "sk";
-    protected static final String ATTRIBUTE_GSI_1_PK = "GSI1PK";
-    protected static final String ATTRIBUTE_GSI_1_SK = "GSI1SK";
-    protected static final String INDEX_GSI_1 = "GSI1";
-    protected static final String ATTRIBUTE_GSI_2_PK = "GSI2PK";
-    protected static final String ATTRIBUTE_GSI_2_SK = "GSI2SK";
-    protected static final String INDEX_GSI_2 = "GS22";
-    protected static final String ATTRIBUTE_GSI_3_PK = "GSI3PK";
-    protected static final String ATTRIBUTE_GSI_3_SK = "GSI3SK";
-    protected static final String INDEX_GSI_3 = "GS23";
     private static final String HTTPS = "https://";
 
     private final Project project;

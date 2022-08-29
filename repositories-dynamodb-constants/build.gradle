@@ -1,0 +1,11 @@
+plugins {
+  id 'java-library'
+}
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+  compileOnly "software.amazon.awssdk:dynamodb"
+}

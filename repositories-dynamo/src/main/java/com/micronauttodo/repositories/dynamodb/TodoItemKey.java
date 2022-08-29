@@ -4,8 +4,7 @@ import com.micronauttodo.models.OAuthUser;
 import com.micronauttodo.models.Todo;
 import io.micronaut.core.annotation.Introspected;
 import io.micronaut.core.annotation.NonNull;
-
-import static com.micronauttodo.repositories.dynamodb.DynamoRepository.HASH;
+import static com.micronauttodo.repositories.dynamodb.constants.DynamoDbConstants.*;
 
 @Introspected
 public class TodoItemKey extends ItemKey {

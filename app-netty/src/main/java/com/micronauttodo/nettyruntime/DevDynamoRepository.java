@@ -1,7 +1,6 @@
 package com.micronauttodo.nettyruntime;
 
 import com.micronauttodo.repositories.dynamodb.DynamoConfiguration;
-import com.micronauttodo.repositories.dynamodb.DynamoRepository;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.env.Environment;
 import io.micronaut.core.annotation.NonNull;
@@ -21,7 +20,7 @@ import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.util.Arrays;
 
-import static com.micronauttodo.repositories.dynamodb.DynamoRepository.*;
+import static com.micronauttodo.repositories.dynamodb.constants.DynamoDbConstants.*;
 
 @Requires(env = Environment.DEVELOPMENT)
 @Singleton
@@ -49,63 +48,6 @@ public class DevDynamoRepository {
     }
 
     public void createTable() {
-        dynamoDbClient.createTable(CreateTableRequest.builder()
-                .attributeDefinitions(AttributeDefinition.builder()
-                                .attributeName(DynamoRepository.ATTRIBUTE_PK)
-                                .attributeType(ScalarAttributeType.S)
-                                .build(),
-                        AttributeDefinition.builder()
-                                .attributeName(DynamoRepository.ATTRIBUTE_SK)
-                                .attributeType(ScalarAttributeType.S)
-                                .build(),
-                        AttributeDefinition.builder()
-                                .attributeName(ATTRIBUTE_GSI_1_PK)
-                                .attributeType(ScalarAttributeType.S)
-                                .build(),
-                        AttributeDefinition.builder()
-                                .attributeName(ATTRIBUTE_GSI_1_SK)
-                                .attributeType(ScalarAttributeType.S)
-                                .build(),
-                        AttributeDefinition.builder()
-                                .attributeName(ATTRIBUTE_GSI_2_PK)
-                                .attributeType(ScalarAttributeType.S)
-                                .build(),
-                        AttributeDefinition.builder()
-                                .attributeName(ATTRIBUTE_GSI_2_SK)
-                                .attributeType(ScalarAttributeType.S)
-                                .build())
-                .keySchema(Arrays.asList(KeySchemaElement.builder()
-                                .attributeName(DynamoRepository.ATTRIBUTE_PK)
-                                .keyType(KeyType.HASH)
-                                .build(),
-                        KeySchemaElement.builder()
-                                .attributeName(DynamoRepository.ATTRIBUTE_SK)
-                                .keyType(KeyType.RANGE)
-                                .build()))
-                .billingMode(BillingMode.PAY_PER_REQUEST)
-                .tableName(dynamoConfiguration.getTableName())
-                .globalSecondaryIndexes(
-                        gsi(INDEX_GSI_1, ATTRIBUTE_GSI_1_PK, ATTRIBUTE_GSI_1_SK),
-                        gsi(INDEX_GSI_2, ATTRIBUTE_GSI_2_PK, ATTRIBUTE_GSI_2_SK)
-                )
-                .build());
+        dynamoDbClient.createTable(createTableRequest(dynamoConfiguration.getTableName()));
     }
-    private static GlobalSecondaryIndex gsi(@NonNull String indexName,
-                                            @NonNull String pkAttributeName,
-                                            @NonNull String skAttributeName) {
-        return GlobalSecondaryIndex.builder()
-                .indexName(indexName)
-                .keySchema(KeySchemaElement.builder()
-                        .attributeName(pkAttributeName)
-                        .keyType(KeyType.HASH)
-                        .build(), KeySchemaElement.builder()
-                        .attributeName(skAttributeName)
-                        .keyType(KeyType.RANGE)
-                        .build())
-                .projection(Projection.builder()
-                        .projectionType(ProjectionType.ALL)
-                        .build())
-                .build();
-    }
-
 }

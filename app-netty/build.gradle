@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":repositories-dynamo"))
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.views:micronaut-views-core")
+    implementation(project(":repositories-dynamodb-constants"))
 }
 
 task copyJsControllers(type: Copy) {

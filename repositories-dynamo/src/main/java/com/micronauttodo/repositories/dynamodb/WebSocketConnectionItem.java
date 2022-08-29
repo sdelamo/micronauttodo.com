@@ -8,8 +8,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.micronauttodo.repositories.dynamodb.DynamoRepository.*;
+import static com.micronauttodo.repositories.dynamodb.constants.DynamoDbConstants.*;
 
 @Introspected
 public class WebSocketConnectionItem extends AbstractItem<WebSocketConnection> {

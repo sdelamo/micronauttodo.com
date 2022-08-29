@@ -6,9 +6,7 @@ import io.micronaut.core.beans.BeanWrapper;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import java.util.Map;
-
-import static com.micronauttodo.repositories.dynamodb.DynamoRepository.ATTRIBUTE_GSI_1_PK;
-import static com.micronauttodo.repositories.dynamodb.DynamoRepository.ATTRIBUTE_GSI_1_SK;
+import static com.micronauttodo.repositories.dynamodb.constants.DynamoDbConstants.*;
 
 public abstract class AbstractItem<T> implements Item {
     private final T entity;

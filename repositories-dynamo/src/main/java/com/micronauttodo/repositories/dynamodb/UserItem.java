@@ -6,8 +6,7 @@ import io.micronaut.core.annotation.NonNull;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Optional;
-
-import static com.micronauttodo.repositories.dynamodb.DynamoRepository.HASH;
+import static com.micronauttodo.repositories.dynamodb.constants.DynamoDbConstants.*;
 
 @Introspected
 public class UserItem extends AbstractItem<OAuthUser> {

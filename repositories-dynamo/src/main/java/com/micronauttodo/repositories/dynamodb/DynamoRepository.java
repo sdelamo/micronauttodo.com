@@ -22,23 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import static com.micronauttodo.repositories.dynamodb.constants.DynamoDbConstants.*;
 
 public abstract class DynamoRepository {
     private static final Logger LOG = LoggerFactory.getLogger(DynamoRepository.class);
-    protected static final String HASH = "#";
-    public static final String ATTRIBUTE_PK = "pk";
-    public static final String ATTRIBUTE_SK = "sk";
-    public static final String ATTRIBUTE_ID = "id";
-    public static final String ATTRIBUTE_GSI_1_PK = "GSI1PK";
-    public static final String ATTRIBUTE_GSI_1_SK = "GSI1SK";
-    public static final String INDEX_GSI_1 = "GSI1";
-
-    public static final String ATTRIBUTE_GSI_2_PK = "GSI2PK";
-
-    public static final String ATTRIBUTE_GSI_2_SK = "GSI2SK";
-
-    public static final String INDEX_GSI_2 = "GSI2";
-
     protected final DynamoDbClient dynamoDbClient;
     protected final DynamoConfiguration dynamoConfiguration;
 
