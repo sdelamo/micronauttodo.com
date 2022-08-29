@@ -24,6 +24,8 @@ import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.WebSocket
 import software.amazon.awscdk.services.certificatemanager.Certificate;
 import software.amazon.awscdk.services.certificatemanager.CertificateValidation;
 import software.amazon.awscdk.services.cloudfront.Behavior;
+import software.amazon.awscdk.services.cloudfront.CloudFrontAllowedCachedMethods;
+import software.amazon.awscdk.services.cloudfront.CloudFrontAllowedMethods;
 import software.amazon.awscdk.services.cloudfront.CloudFrontWebDistribution;
 import software.amazon.awscdk.services.cloudfront.OriginAccessIdentity;
 import software.amazon.awscdk.services.cloudfront.S3OriginConfig;
@@ -60,6 +62,8 @@ import software.amazon.awscdk.services.route53.targets.ApiGateway;
 import software.amazon.awscdk.services.route53.targets.ApiGatewayDomain;
 import software.amazon.awscdk.services.route53.targets.CloudFrontTarget;
 import software.amazon.awscdk.services.s3.Bucket;
+import software.amazon.awscdk.services.s3.CorsRule;
+import software.amazon.awscdk.services.s3.HttpMethods;
 import software.amazon.awscdk.services.s3.deployment.BucketDeployment;
 import software.amazon.awscdk.services.s3.deployment.Source;
 import software.amazon.awscdk.services.ses.CfnEmailIdentity;
@@ -122,6 +126,7 @@ public class AppStack extends Stack {
         table.grantReadWriteData(functionNative);
 
         String subdomain = "webapp";
+
         LambdaRestApi api = createApi(subdomain, functionNative, cert, zone);
 
         Module postConfirmationModule = project.findModuleByName(Main.MODULE_FUNCTION_COGNITO_POST_CONFIRMATION);
@@ -131,7 +136,8 @@ public class AppStack extends Stack {
                 ).build();
         table.grantReadWriteData(postConfirmationFunction);
 
-        environmentVariables = createAuthorizationServer(cert, zone, postConfirmationFunction, HTTPS + subdomain + "." + project.getDomainName());
+        String webappDomainName = HTTPS + subdomain + "." + project.getDomainName();
+        environmentVariables = createAuthorizationServer(cert, zone, postConfirmationFunction, webappDomainName);
         addEnvironmentVariablesToFunction(environmentVariables, function);
         addEnvironmentVariablesToFunction(environmentVariables, functionNative);
 
@@ -140,6 +146,7 @@ public class AppStack extends Stack {
         createCloudFrontDistribution("openapi", cert, openApiBucket, zone, "micronaut-todo-1.0.yml");
 
         Bucket assetsBucket = createBucket(project.getName() + "-s3-assets");
+        addCorsRule(assetsBucket, webappDomainName);
         createBucketDeployment(assetsBucket, "assets");
         createCloudFrontDistribution("assets", cert, assetsBucket, zone, "index.html");
 
@@ -162,6 +169,14 @@ public class AppStack extends Stack {
         stage.grantManagementApiAccess(websocketsFunction);
 
         output(api);
+    }
+
+    private void addCorsRule(Bucket bucket, String allowedOrigin) {
+        bucket.addCorsRule(CorsRule.builder()
+                .allowedMethods(Arrays.asList(HttpMethods.GET, HttpMethods.POST, HttpMethods.PUT, HttpMethods.DELETE, HttpMethods.HEAD))
+                .allowedHeaders(Collections.singletonList("*"))
+                .allowedOrigins(Collections.singletonList(allowedOrigin))
+                .build());
     }
 
     void createWebSocketApiDomain(String domain, String id, Certificate cert, IHostedZone zone) {
@@ -227,6 +242,7 @@ public class AppStack extends Stack {
                         .behaviors(Collections.singletonList(Behavior.builder()
                                 .isDefaultBehavior(true)
                                 .viewerProtocolPolicy(ViewerProtocolPolicy.REDIRECT_TO_HTTPS)
+                                .allowedMethods(CloudFrontAllowedMethods.GET_HEAD_OPTIONS)
                                 .build()))
                         .build()))
                 .defaultRootObject(defaultRootObject)
