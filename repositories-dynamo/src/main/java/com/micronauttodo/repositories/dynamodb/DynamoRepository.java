@@ -33,6 +33,12 @@ public abstract class DynamoRepository {
     public static final String ATTRIBUTE_GSI_1_SK = "GSI1SK";
     public static final String INDEX_GSI_1 = "GSI1";
 
+    public static final String ATTRIBUTE_GSI_2_PK = "GSI2PK";
+
+    public static final String ATTRIBUTE_GSI_2_SK = "GSI2SK";
+
+    public static final String INDEX_GSI_2 = "GSI2";
+
     protected final DynamoDbClient dynamoDbClient;
     protected final DynamoConfiguration dynamoConfiguration;
 
@@ -72,9 +78,18 @@ public abstract class DynamoRepository {
                                                @NonNull String sk,
                                                @Nullable AttributeValue lastEvaluatedKey,
                                                @Nullable Integer limit) {
+        return findAllQueryRequest(pk, sk, INDEX_GSI_1, ATTRIBUTE_GSI_1_PK, ATTRIBUTE_GSI_1_SK, lastEvaluatedKey, limit);
+    }
+    protected QueryRequest findAllQueryRequest(@NonNull String pk,
+                                               @NonNull String sk,
+                                               @NonNull String indexName,
+                                               @NonNull String pkAttribute,
+                                               @NonNull String skAttribute,
+                                               @Nullable AttributeValue lastEvaluatedKey,
+                                               @Nullable Integer limit) {
         QueryRequest.Builder builder = QueryRequest.builder()
                 .tableName(dynamoConfiguration.getTableName())
-                .indexName(INDEX_GSI_1)
+                .indexName(indexName)
                 .scanIndexForward(false);
         if (limit != null) {
             builder.limit(limit);
@@ -83,10 +98,10 @@ public abstract class DynamoRepository {
             LOG.trace("pk {} sk: {}", pk, sk);
         }
         return builder.keyConditionExpression(
-                lastEvaluatedKey == null ?
-                "#pk = :pk and begins_with(#sk,:sk)" :
-                "#pk = :pk and begins_with(#sk,:sk) and #sk < :lastKey")
-                .expressionAttributeNames(Map.of("#pk", ATTRIBUTE_GSI_1_PK, "#sk", ATTRIBUTE_GSI_1_SK))
+                        lastEvaluatedKey == null ?
+                                "#pk = :pk and begins_with(#sk,:sk)" :
+                                "#pk = :pk and begins_with(#sk,:sk) and #sk < :lastKey")
+                .expressionAttributeNames(Map.of("#pk", pkAttribute, "#sk", skAttribute))
                 .expressionAttributeValues(lastEvaluatedKey == null ?
                         Map.of(":pk", s(pk), ":sk", s(sk)):
                         Map.of(":pk", s(pk), ":sk", s(sk), ":lastKey", lastEvaluatedKey))

@@ -21,9 +21,7 @@ import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.util.Arrays;
 
-import static com.micronauttodo.repositories.dynamodb.DynamoRepository.ATTRIBUTE_GSI_1_PK;
-import static com.micronauttodo.repositories.dynamodb.DynamoRepository.ATTRIBUTE_GSI_1_SK;
-import static com.micronauttodo.repositories.dynamodb.DynamoRepository.INDEX_GSI_1;
+import static com.micronauttodo.repositories.dynamodb.DynamoRepository.*;
 
 @Requires(env = Environment.DEVELOPMENT)
 @Singleton
@@ -67,6 +65,14 @@ public class DevDynamoRepository {
                         AttributeDefinition.builder()
                                 .attributeName(ATTRIBUTE_GSI_1_SK)
                                 .attributeType(ScalarAttributeType.S)
+                                .build(),
+                        AttributeDefinition.builder()
+                                .attributeName(ATTRIBUTE_GSI_2_PK)
+                                .attributeType(ScalarAttributeType.S)
+                                .build(),
+                        AttributeDefinition.builder()
+                                .attributeName(ATTRIBUTE_GSI_2_SK)
+                                .attributeType(ScalarAttributeType.S)
                                 .build())
                 .keySchema(Arrays.asList(KeySchemaElement.builder()
                                 .attributeName(DynamoRepository.ATTRIBUTE_PK)
@@ -78,7 +84,10 @@ public class DevDynamoRepository {
                                 .build()))
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .tableName(dynamoConfiguration.getTableName())
-                .globalSecondaryIndexes(gsi(INDEX_GSI_1, ATTRIBUTE_GSI_1_PK, ATTRIBUTE_GSI_1_SK))
+                .globalSecondaryIndexes(
+                        gsi(INDEX_GSI_1, ATTRIBUTE_GSI_1_PK, ATTRIBUTE_GSI_1_SK),
+                        gsi(INDEX_GSI_2, ATTRIBUTE_GSI_2_PK, ATTRIBUTE_GSI_2_SK)
+                )
                 .build());
     }
     private static GlobalSecondaryIndex gsi(@NonNull String indexName,

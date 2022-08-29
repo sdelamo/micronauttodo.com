@@ -1,7 +1,8 @@
-package com.micronauttodo.controllers;
+package com.micronauttodo.websockets.handler;
 
 import com.micronauttodo.repositories.dynamodb.DynamoConfiguration;
 import com.micronauttodo.repositories.dynamodb.DynamoRepository;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.NonNull;
 import jakarta.inject.Singleton;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 
 import static com.micronauttodo.repositories.dynamodb.DynamoRepository.*;
 
+@Requires(beans = {DynamoDbClient.class, DynamoConfiguration.class})
 @Singleton
 public class TestDynamoRepository {
 

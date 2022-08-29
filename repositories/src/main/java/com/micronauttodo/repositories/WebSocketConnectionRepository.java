@@ -12,8 +12,7 @@ public interface WebSocketConnectionRepository {
     void save(@NonNull @NotNull OAuthUser user,
               @NonNull @NotNull @Valid WebSocketConnection connection);
 
-    void delete(@NonNull @NotNull OAuthUser user,
-                @NonNull @NotNull @Valid WebSocketConnection connection);
+    void delete(@NonNull @NotNull @Valid WebSocketConnection connection);
 
     @NonNull
     List<WebSocketConnection> findAllByUser(@NonNull @NotNull OAuthUser user);

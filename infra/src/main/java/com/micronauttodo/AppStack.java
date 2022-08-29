@@ -157,6 +157,8 @@ public class AppStack extends Stack {
                 websocketsModule.getName(),
                 functionHandler(websocketsModule)
         ).build();
+        table.grantReadWriteData(websocketsFunction);
+
         WebSocketApi webSocketApi = createWebSocketApi(project.getName(), websocketsFunction);
         software.amazon.awscdk.services.apigatewayv2.alpha.DomainName webSocketApiDomain =  createWebSocketApiDomain("websockets." + project.getDomainName(),
                 project.getName() + "-apigateway-websockets-domainname",
@@ -439,6 +441,9 @@ public class AppStack extends Stack {
         table.addGlobalSecondaryIndex(globalSecondaryIndexProps(INDEX_GSI_1,
                 ATTRIBUTE_GSI_1_PK,
                 ATTRIBUTE_GSI_1_SK));
+        table.addGlobalSecondaryIndex(globalSecondaryIndexProps(INDEX_GSI_2,
+                ATTRIBUTE_GSI_2_PK,
+                ATTRIBUTE_GSI_2_SK));
         return table;
     }
 

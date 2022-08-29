@@ -54,7 +54,7 @@ public abstract class AbstractItem<T> implements Item {
     }
 
     @NonNull
-    private AttributeValue s(@NonNull String str) {
+    public static AttributeValue s(@NonNull String str) {
         return AttributeValue.builder().s(str).build();
     }
 
