@@ -37,7 +37,8 @@ public class FunctionRequestHandler extends MicronautRequestHandler<APIGatewayV2
     }
 
     void processWebSocketEvent(APIGatewayV2WebSocketEvent input) {
-        EventType.of(input.getRequestContext().getEventType()).ifPresent(eventType -> {
+        EventType.of(input.getRequestContext().getEventType())
+                .ifPresent(eventType -> {
             switch (eventType) {
                 case CONNECT:
                     userOfInput(input).ifPresent(user -> repository.save(user, connectionOfInput(input)));
@@ -74,13 +75,12 @@ public class FunctionRequestHandler extends MicronautRequestHandler<APIGatewayV2
     }
 
     @NonNull
-    private WebSocketConnection connectionOfInput(APIGatewayV2WebSocketEvent input) {
+    private WebSocketConnection connectionOfInput(@NonNull APIGatewayV2WebSocketEvent input) {
         return new WebSocketConnection(System.getenv("AWS_REGION"),
                 input.getRequestContext().getApiId(),
                 input.getRequestContext().getStage(),
                 input.getRequestContext().getConnectionId(),
                 input.getRequestContext().getDomainName());
     }
-
 }
 
