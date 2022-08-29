@@ -1,28 +1,14 @@
 plugins {
-    id("java-library")
-}
-
-version = "0.1"
-group = "com.micronauttodo"
-
-repositories {
-    mavenCentral()
+    id 'com.micronauttodo.build.internal.lib-module'
 }
 
 dependencies {
-    annotationProcessor(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     annotationProcessor("io.micronaut.openapi:micronaut-openapi")
-    annotationProcessor "io.micronaut:micronaut-inject-java"
-    annotationProcessor "io.micronaut:micronaut-validation"
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
 
     api(project(":services"))
 
-    implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     implementation("io.swagger.core.v3:swagger-annotations")
-    implementation "io.micronaut:micronaut-runtime"
-    implementation "io.micronaut:micronaut-inject"
-    implementation "io.micronaut:micronaut-validation"
 
     annotationProcessor("io.micronaut:micronaut-http-validation")
     implementation("io.micronaut:micronaut-http-server")
@@ -41,12 +27,4 @@ task copyOpenApi(type: Copy) {
 }
 tasks.named('jar') {
     it.dependsOn('copyOpenApi')
-}
-java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
-}
-
-tasks.named("test") {
-    useJUnitPlatform()
 }

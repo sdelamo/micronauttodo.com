@@ -1,21 +1,9 @@
 plugins {
-    id("java-library")
-}
-
-repositories {
-    mavenCentral()
+    id 'com.micronauttodo.build.internal.lib-module'
 }
 
 dependencies {
     implementation("io.micronaut.aws:micronaut-aws-sdk-v2")
     implementation("software.amazon.awssdk:apigatewaymanagementapi:2.17.229")
-
-    annotationProcessor(platform("io.micronaut:micronaut-bom:$micronautVersion"))
-    annotationProcessor "io.micronaut:micronaut-inject-java"
-
-    implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
-    implementation "io.micronaut:micronaut-runtime"
-    implementation "io.micronaut:micronaut-inject"
-
     api(project(":http"))
 }
