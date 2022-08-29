@@ -1,0 +1,68 @@
+[
+  {
+    "name":"org.thymeleaf.context.AbstractEngineContext",
+    "queryAllDeclaredMethods":true,
+    "queryAllPublicMethods":true}
+,
+  {
+    "name":"org.thymeleaf.context.IContext",
+    "queryAllDeclaredMethods":true}
+,
+  {
+    "name":"org.thymeleaf.context.IEngineContext",
+    "queryAllDeclaredMethods":true}
+,
+  {
+    "name":"org.thymeleaf.context.IExpressionContext",
+    "queryAllDeclaredMethods":true}
+,
+  {
+    "name":"org.thymeleaf.context.ITemplateContext",
+    "queryAllDeclaredMethods":true}
+,
+  {
+    "name":"org.thymeleaf.standard.expression.AdditionExpression",
+    "methods":[{"name":"<init>","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression","org.thymeleaf.standard.expression.IStandardExpression"] }]}
+,
+  {
+    "name":"org.thymeleaf.standard.expression.AdditionSubtractionExpression",
+    "methods":[
+      {"name":"isLeftAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] },
+      {"name":"isRightAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] }
+    ]}
+,
+  {
+    "name":"org.thymeleaf.standard.expression.AndExpression",
+    "queriedMethods":[
+      {"name":"isLeftAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] },
+      {"name":"isRightAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] }
+    ]}
+,
+  {
+    "name":"org.thymeleaf.standard.expression.EqualsNotEqualsExpression",
+    "queriedMethods":[
+      {"name":"isLeftAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] },
+      {"name":"isRightAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] }
+    ]}
+,
+  {
+    "name":"org.thymeleaf.standard.expression.GreaterLesserExpression",
+    "queriedMethods":[
+      {"name":"isLeftAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] },
+      {"name":"isRightAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] }
+    ]}
+,
+  {
+    "name":"org.thymeleaf.standard.expression.MultiplicationDivisionRemainderExpression",
+    "queriedMethods":[
+      {"name":"isLeftAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] },
+      {"name":"isRightAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] }
+    ]}
+,
+  {
+    "name":"org.thymeleaf.standard.expression.OrExpression",
+    "queriedMethods":[
+      {"name":"isLeftAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] },
+      {"name":"isRightAllowed","parameterTypes":["org.thymeleaf.standard.expression.IStandardExpression"] }
+    ]}
+]

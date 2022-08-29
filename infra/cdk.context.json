@@ -1,0 +1,18 @@
+{
+  "availability-zones:account=482340919923:region=us-east-1": [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c",
+    "us-east-1d",
+    "us-east-1e",
+    "us-east-1f"
+  ],
+  "hosted-zone:account=482340919923:domainName=cfptracker.com:region=us-east-1": {
+    "Id": "/hostedzone/Z0911494TC4NTR4JVHIO",
+    "Name": "cfptracker.com."
+  },
+  "hosted-zone:account=646307737039:domainName=micronauttodo.com:region=us-east-1": {
+    "Id": "/hostedzone/Z0506496192T8O9A7817P",
+    "Name": "micronauttodo.com."
+  }
+}
