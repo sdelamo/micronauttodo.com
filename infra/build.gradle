@@ -11,12 +11,12 @@ dependencies {
     implementation 'software.amazon.awscdk:apigatewayv2-alpha:2.27.0-alpha.0'
     implementation 'software.amazon.awscdk:apigatewayv2-integrations-alpha:2.27.0-alpha.0'
 
-    implementation platform("io.micronaut:micronaut-bom:3.5.2")
+    implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
     implementation("io.micronaut.aws:micronaut-aws-cdk")
     implementation("software.amazon.awscdk:aws-cdk-lib:2.31.1")
     implementation(project(":repositories-dynamodb-constants"))
 
-    testImplementation platform("io.micronaut:micronaut-bom:3.5.2")
+    testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-engine")
 }
