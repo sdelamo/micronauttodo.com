@@ -154,6 +154,8 @@ public class AppStack extends Stack {
         webSocketApi.grantManageConnections(websocketsFunction);
         WebSocketStage stage = createWebSocketStage(project.getName(), webSocketApi, webSocketApiDomain);
         stage.grantManagementApiAccess(websocketsFunction);
+        stage.grantManagementApiAccess(function);
+        stage.grantManagementApiAccess(functionNative);
         output(api);
     }
 
