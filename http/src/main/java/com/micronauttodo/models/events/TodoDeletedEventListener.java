@@ -1,5 +1,6 @@
 package com.micronauttodo.models.events;
 
+import com.micronauttodo.utils.TurboUtils;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.core.annotation.NonNull;
@@ -22,12 +23,6 @@ public class TodoDeletedEventListener implements ApplicationEventListener<TodoDe
 
     @Override
     public void onApplicationEvent(TodoDeletedEvent event) {
-        websocketsTurboStreamPublisher.publish(event.getUser(), turboStream(event.getId()));
-    }
-
-    private TurboStream.Builder turboStream(@NonNull String id) {
-        return TurboStream.builder()
-                .action(TurboStreamAction.REMOVE)
-                .targetDomId("todo-" + id);
+        websocketsTurboStreamPublisher.publish(event.getUser(), TurboUtils.remove(event.getId()));
     }
 }

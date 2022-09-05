@@ -4,6 +4,7 @@ import com.micronauttodo.models.OAuthUser;
 import com.micronauttodo.models.Todo;
 import com.micronauttodo.models.TodoCreate;
 import com.micronauttodo.repositories.TodoRepository;
+import com.micronauttodo.services.TodoDeleteService;
 import com.micronauttodo.services.TodoSaveService;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpHeaders;
@@ -42,11 +43,14 @@ import java.util.Optional;
 @Controller(Api.PATH + "/todo")
 public class TodoController {
     private final TodoSaveService todoSaveService;
+    private final TodoDeleteService todoDeleteService;
     private final TodoRepository todoRepository;
 
     public TodoController(TodoSaveService todoSaveService,
+                          TodoDeleteService todoDeleteService,
                           TodoRepository todoRepository) {
         this.todoSaveService = todoSaveService;
+        this.todoDeleteService = todoDeleteService;
         this.todoRepository = todoRepository;
     }
 
@@ -76,7 +80,7 @@ public class TodoController {
     @Delete("/{id}")
     void delete(@NonNull @NotBlank @PathVariable String id,
                         @NonNull OAuthUser user) {
-        todoRepository.delete(id, user);
+        todoDeleteService.delete(id, user);
     }
 
     @Operation(operationId = "todo-index",
@@ -90,6 +94,7 @@ public class TodoController {
     private URI location(@NonNull String id) {
         return UriBuilder.of("/api")
                 .path("v1")
+                .path("todo")
                 .path(id)
                 .build();
     }

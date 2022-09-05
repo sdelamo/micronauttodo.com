@@ -4,6 +4,7 @@ import com.micronauttodo.models.OAuthUser;
 import com.micronauttodo.models.Todo;
 import com.micronauttodo.models.TodoCreate;
 import com.micronauttodo.services.TodoSaveService;
+import com.micronauttodo.utils.TurboUtils;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -47,10 +48,7 @@ public class TodoSaveController {
         TodoCreate todo = new TodoCreate(task.startsWith("task=") ? task.substring("task=".length()) : task);
         String todoId = todoSaveService.save(todo, oAuthUser);
         if (TurboMediaType.acceptsTurboStream(request)) {
-            return HttpResponse.ok(TurboStream.builder()
-                    .template("/todo/_tr.html", Collections.singletonMap("todo", new Todo(todoId, todo.getTask())))
-                    .targetDomId("todos-rows")
-                    .append());
+            return HttpResponse.ok(TurboUtils.append(new Todo(todoId, todo.getTask())));
         }
         return HttpResponse.seeOther(UriBuilder.of("/todo").build());
     }

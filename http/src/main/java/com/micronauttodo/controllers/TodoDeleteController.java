@@ -3,6 +3,7 @@ package com.micronauttodo.controllers;
 import com.micronauttodo.models.OAuthUser;
 import com.micronauttodo.repositories.TodoRepository;
 import com.micronauttodo.services.TodoDeleteService;
+import com.micronauttodo.utils.TurboUtils;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.http.HttpResponse;
@@ -42,11 +43,8 @@ class TodoDeleteController {
                            @NonNull OAuthUser oAuthUser,
                            HttpRequest<?> request) {
         todoDeleteService.delete(id, oAuthUser);
-        if (TurboMediaType.acceptsTurboStream(request)) {
-            return HttpResponse.ok(TurboStream.builder()
-                    .targetDomId("todo-" + id)
-                    .remove());
-        }
-        return HttpResponse.seeOther(UriBuilder.of("/todo").build());
+        return TurboMediaType.acceptsTurboStream(request) ?
+                HttpResponse.ok(TurboUtils.remove(id)) :
+                HttpResponse.seeOther(UriBuilder.of("/todo").build());
     }
 }

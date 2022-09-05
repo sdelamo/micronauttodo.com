@@ -26,3 +26,5 @@ micronaut:
         pattern: '/assets/javascripts/controllers/*'
         access:
           - 'isAnonymous()'
+websockets:
+  url: 'localhost:8080/todo'

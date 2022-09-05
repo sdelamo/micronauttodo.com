@@ -1,6 +1,7 @@
 package com.micronauttodo.models.events;
 
 import com.micronauttodo.models.Todo;
+import com.micronauttodo.utils.TurboUtils;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.event.ApplicationEventListener;
 import io.micronaut.core.annotation.NonNull;
@@ -20,13 +21,6 @@ public class TodoSavedEventListener implements ApplicationEventListener<TodoSave
 
     @Override
     public void onApplicationEvent(TodoSavedEvent event) {
-        websocketsTurboStreamPublisher.publish(event.getUser(), turboStream(event.getTodo()));
-    }
-
-    private TurboStream.Builder turboStream(@NonNull Todo todo) {
-        return TurboStream.builder()
-                .template("/todo/_tr.html", Collections.singletonMap("todo", todo))
-                .targetDomId("todos-rows")
-                .append();
+        websocketsTurboStreamPublisher.publish(event.getUser(), TurboUtils.append(event.getTodo()));
     }
 }

@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-@Secured(SecurityRule.IS_AUTHENTICATED)
+@Secured(SecurityRule.IS_ANONYMOUS)
 @ServerWebSocket("/todo{?token}")
 class TodoWebSocketServer implements WebsocketsTurboStreamPublisher {
     private static final Logger LOG = LoggerFactory.getLogger(TodoWebSocketServer.class);
@@ -67,8 +67,8 @@ class TodoWebSocketServer implements WebsocketsTurboStreamPublisher {
     }
 
     @OnMessage
-    public void onMessage(String room, String message, WebSocketSession session) {
-        LOG.info("onMessage room {}", room);
+    public void onMessage(String message, WebSocketSession session) {
+        LOG.info("onMessage {}", message);
     }
 
     @OnClose
