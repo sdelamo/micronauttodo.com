@@ -1,0 +1,19 @@
+plugins {
+    id 'com.micronauttodo.build.internal.lib-module'
+}
+
+dependencies {
+    api(project(":repositories"))
+    annotationProcessor("io.micronaut.microstream:micronaut-microstream-annotations:1.2.0")
+    implementation("io.micronaut.microstream:micronaut-microstream-annotations:1.2.0")
+    api("io.micronaut.microstream:micronaut-microstream:1.2.0")
+
+    testImplementation("com.github.ksuid:ksuid:1.1.1")
+}
+
+configurations.all {
+    resolutionStrategy {
+        force "io.micronaut.microstream:micronaut-microstream-annotations:1.2.0"
+        force "io.micronaut.microstream:micronaut-microstream:1.2.0"
+    }
+}

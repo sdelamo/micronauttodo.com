@@ -16,3 +16,4 @@ infra/cdk.out
 application-dev.yml
 app-netty/src/main/resources/assets/javascripts/controllers/*.mjs
 openapi/*.yml
+app-netty-microstream/src/main/resources/assets/javascripts/controllers/*.mjs
