@@ -70,6 +70,8 @@ websockets:
   url: 'localhost:8080/todo'
 ---
 microstream:
+  rest:
+    enabled: true
   storage:
     todos:
       root-class: 'com.micronauttodo.repositories.microstream.RootData'
