@@ -1,0 +1,8 @@
+plugins {
+    id 'com.micronauttodo.build.internal.lib-module'
+}
+
+dependencies {
+    api(project(":http"))
+    implementation("io.micronaut.reactor:micronaut-reactor")
+}

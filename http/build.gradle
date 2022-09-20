@@ -14,9 +14,9 @@ dependencies {
     implementation("io.micronaut:micronaut-http-server")
 
     implementation("io.micronaut:micronaut-management")
-    implementation("io.micronaut.views:micronaut-views-thymeleaf")
-    implementation("io.micronaut.security:micronaut-security-jwt")
-    implementation("io.micronaut.security:micronaut-security-oauth2")
+    api("io.micronaut.views:micronaut-views-thymeleaf")
+    api("io.micronaut.security:micronaut-security-jwt")
+    api("io.micronaut.security:micronaut-security-oauth2")
 }
 
 

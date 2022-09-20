@@ -1,4 +1,4 @@
-package com.micronauttodo.nettyruntime;
+package com.micronauttodo.websocket.server;
 
 import com.micronauttodo.models.OAuthUser;
 import com.micronauttodo.models.events.WebsocketsTurboStreamPublisher;
@@ -50,10 +50,11 @@ class TodoWebSocketServer implements WebsocketsTurboStreamPublisher {
 
     @OnOpen
     public void onOpen(String token, WebSocketSession session) {
-        LOG.info("onOpen token {}", token);
+        LOG.info("onOpen {}", token);
 
         Mono.from(jwtTokenValidator.validateToken(token, null)).subscribe(authentication -> {
                     OAuthUser user = OauthUserUtils.toOauthUser(authentication);
+                    LOG.info("token validated for user {}", user.getSub());
                     userSessions.computeIfPresent(user, (k, sessions) -> {
                         sessions.add(session.getId());
                         return sessions;
@@ -76,6 +77,7 @@ class TodoWebSocketServer implements WebsocketsTurboStreamPublisher {
         LOG.info("onClose token {}", token);
         Mono.from(jwtTokenValidator.validateToken(token, null)).subscribe(authentication -> {
             OAuthUser user = OauthUserUtils.toOauthUser(authentication);
+            LOG.info("token validated for user {}", user.getSub());
             userSessions.computeIfPresent(user, (k, sessions) -> {
                 sessions.remove(session.getId());
                 return sessions;
