@@ -23,14 +23,14 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void save(@NotNull @Valid OAuthUser user) {
-        if (!rootProvider.root().getUsers().getConnections().containsKey(user)) {
-            addUser(rootProvider.root().getUsers().getConnections(), user);
+        if (!rootProvider.root().getConnections().containsKey(user)) {
+            addUser(rootProvider.root().getConnections(), user);
         }
     }
 
     @Override
     public void delete(@NotNull @Valid OAuthUser user) {
-        removeUser(rootProvider.root().getUsers().getConnections(), user);
+        removeUser(rootProvider.root().getConnections(), user);
     }
 
     @StoreParams("users")
@@ -44,6 +44,6 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     public int count() {
-        return rootProvider.root().getUsers().getConnections().keySet().size();
+        return rootProvider.root().getConnections().keySet().size();
     }
 }

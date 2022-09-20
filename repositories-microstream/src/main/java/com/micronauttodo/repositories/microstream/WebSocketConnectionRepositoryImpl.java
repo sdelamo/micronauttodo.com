@@ -31,16 +31,16 @@ public class WebSocketConnectionRepositoryImpl implements WebSocketConnectionRep
     @Override
     public void save(@NonNull @NotNull OAuthUser user,
                      @NonNull @NotNull @Valid WebSocketConnection connection) {
-        if (rootProvider.root().getUsers().getConnections().containsKey(user)) {
-            append(rootProvider.root().getUsers().getConnections(), user, connection);
+        if (rootProvider.root().getConnections().containsKey(user)) {
+            append(rootProvider.root().getConnections(), user, connection);
         } else {
-            add(rootProvider.root().getUsers().getConnections(), user, connection);
+            add(rootProvider.root().getConnections(), user, connection);
         }
     }
 
     @Override
     public void delete(@NonNull @NotNull @Valid WebSocketConnection connection) {
-        Map<OAuthUser, Set<WebSocketConnection>> m = rootProvider.root().getUsers().getConnections();
+        Map<OAuthUser, Set<WebSocketConnection>> m = rootProvider.root().getConnections();
         OAuthUser belongsTo = null;
         for (OAuthUser user : m.keySet()) {
             if (m.get(user).contains(connection)) {
@@ -49,14 +49,14 @@ public class WebSocketConnectionRepositoryImpl implements WebSocketConnectionRep
             }
         }
         if (belongsTo != null) {
-            delete(rootProvider.root().getUsers().getConnections(), belongsTo, connection);
+            delete(rootProvider.root().getConnections(), belongsTo, connection);
         }
     }
 
     @Override
     @NonNull
     public List<WebSocketConnection> findAllByUser(@NonNull @NotNull OAuthUser user) {
-        Map<OAuthUser, Set<WebSocketConnection>> m = rootProvider.root().getUsers().getConnections();
+        Map<OAuthUser, Set<WebSocketConnection>> m = rootProvider.root().getConnections();
         return m.containsKey(user) ?
                 new ArrayList<>(m.get(user)) :
                 Collections.emptyList();

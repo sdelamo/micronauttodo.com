@@ -31,8 +31,8 @@ public class TodoRepositoryImpl implements TodoRepository {
     @Override
     public void delete(@NonNull @NotBlank String id,
                        @NonNull @NotNull @Valid OAuthUser user) {
-        if (rootProvider.root().getTodos().getTodos().containsKey(user.getSub())) {
-            deleteTodos(rootProvider.root().getTodos().getTodos(), id, user);
+        if (rootProvider.root().getTodos().containsKey(user.getSub())) {
+            deleteTodos(rootProvider.root().getTodos(), id, user);
         }
     }
 
@@ -46,10 +46,10 @@ public class TodoRepositoryImpl implements TodoRepository {
 
     @Override
     public void save(@NonNull @NotNull @Valid Todo todo, @NonNull @NotNull @Valid OAuthUser user) {
-        if (rootProvider.root().getTodos().getTodos().containsKey(user.getSub())) {
-            append(rootProvider.root().getTodos().getTodos(), todo, user);
+        if (rootProvider.root().getTodos().containsKey(user.getSub())) {
+            append(rootProvider.root().getTodos(), todo, user);
         } else {
-            save(rootProvider.root().getTodos().getTodos(), todo, user);
+            save(rootProvider.root().getTodos(), todo, user);
         }
     }
 
@@ -85,7 +85,7 @@ public class TodoRepositoryImpl implements TodoRepository {
     }
 
     private Map<String, Map<String, Todo>> todos() {
-        return rootProvider.root().getTodos().getTodos();
+        return rootProvider.root().getTodos();
     }
 
     public int countByUser(@NonNull OAuthUser user) {
