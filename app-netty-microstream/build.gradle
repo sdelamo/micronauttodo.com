@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":http-websocket-server"))
     implementation(project(":repositories-microstream"))
     implementation("io.micronaut:micronaut-management")
-    developmentOnly("io.micronaut.microstream:micronaut-microstream-rest:1.2.0")
+    implementation("io.micronaut.microstream:micronaut-microstream-rest:1.2.0")
 }
 
 configurations.all {
