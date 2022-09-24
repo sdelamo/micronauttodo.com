@@ -337,27 +337,8 @@ public class AppStack extends Stack {
 
         return Map.of("COGNITO_POOL_ID", userPool.getUserPoolId(),
                 "COGNITO_REGION", "us-east-1",
-                    "OAUTH_CLIENT_ID", userPoolClient.getUserPoolClientId()
-        ); //, "OAUTH_CLIENT_SECRET", getUserPoolClientSecret(userPool, userPoolClient));
-
-    }
-
-    private String getUserPoolClientSecret(UserPool userPool, UserPoolClient userPoolClient) {
-        AwsCustomResource describeCognitoUserPoolClient = AwsCustomResource.Builder.create(this, "DescribeCognitoUserPoolClient")
-                .resourceType("Custom::DescribeCognitoUserPoolClient")
-                .onCreate(AwsSdkCall.builder()
-                        .region("us-east-1")
-                        .service("CognitoIdentityServiceProvider")
-                        .action("describeUserPoolClient")
-                        .parameters(Map.of("UserPoolId", userPool.getUserPoolId(),
-                                        "ClientId", userPoolClient.getUserPoolClientId()))
-                        .physicalResourceId(PhysicalResourceId.of(userPoolClient.getUserPoolClientId()))
-                        .build())
-                .policy(AwsCustomResourcePolicy.fromSdkCalls(SdkCallsPolicyOptions.builder()
-                        .resources(ANY_RESOURCE)
-                        .build()))
-                .build();
-        return describeCognitoUserPoolClient.getResponseField("UserPoolClient.ClientSecret");
+                    "OAUTH_CLIENT_ID", userPoolClient.getUserPoolClientId(),
+                "OAUTH_CLIENT_SECRET", userPoolClient.getUserPoolClientSecret().unsafeUnwrap());
     }
 
     private Function.Builder createFunction(Map<String, String> environmentVariables,
