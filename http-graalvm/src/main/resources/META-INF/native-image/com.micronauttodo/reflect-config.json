@@ -1,5 +1,15 @@
 [
   {
+    "name":"com.micronauttodo.models.Todo",
+    "queryAllPublicMethods":true,
+    "methods":[{"name":"getId","parameterTypes":[] }]
+  },
+  {
+    "name":"com.micronauttodo.models.TodoCreate",
+    "queryAllPublicMethods":true,
+    "methods":[{"name":"getTask","parameterTypes":[] }]
+  },
+  {
     "name":"org.thymeleaf.context.AbstractEngineContext",
     "queryAllDeclaredMethods":true,
     "queryAllPublicMethods":true}

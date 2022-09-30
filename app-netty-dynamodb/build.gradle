@@ -4,6 +4,8 @@ plugins {
 dependencies {
     developmentOnly(project(":dev-security"))
     developmentOnly(project(":dev-localstack"))
+
+    implementation(project(":http-graalvm"))
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation(project(":http-websocket-server"))
     implementation(project(":repositories-dynamo"))

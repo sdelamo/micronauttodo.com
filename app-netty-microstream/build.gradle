@@ -8,4 +8,6 @@ dependencies {
     developmentOnly("io.micronaut.microstream:micronaut-microstream-rest")
     developmentOnly(project(":dev-security"))
 }
-
+application {
+    mainClass.set("com.micronauttodo.netty.microstream.Application")
+}
