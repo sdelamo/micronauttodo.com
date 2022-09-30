@@ -1,55 +1,11 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.minimal.application") version "3.5.3"
+    id 'com.micronauttodo.build.internal.application-module'
 }
-
-version = "0.1"
-group = "com.micronautodo"
-
-repositories {
-    mavenCentral()
-    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 dependencies {
-    runtimeOnly("ch.qos.logback:logback-classic")
     implementation(project(":http-websocket-server"))
     implementation(project(":repositories-microstream"))
     implementation("io.micronaut:micronaut-management")
-    implementation("io.micronaut.microstream:micronaut-microstream-rest:1.2.0")
+    developmentOnly("io.micronaut.microstream:micronaut-microstream-rest")
+    developmentOnly(project(":dev-security"))
 }
-
-configurations.all {
-    resolutionStrategy {
-        force "io.micronaut.microstream:micronaut-microstream-rest:1.2.0"
-    }
-}
-
-task copyJsControllers(type: Copy) {
-    from '../assets/assets/javascripts/controllers'
-    into 'src/main/resources/assets/javascripts/controllers'
-}
-tasks.named('processResources') {
-    it.dependsOn('copyJsControllers')
-}
-
-application {
-    mainClass.set("com.micronauttodo.netty.microstream.Application")
-}
-java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
-}
-
-micronaut {
-    runtime("netty")
-    testRuntime("junit5")
-    processing {
-        incremental(true)
-        annotations("com.micronauttodo.netty.microstream.*")
-    }
-}
-
-
-
 

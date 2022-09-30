@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     testImplementation(project(":repositories-dynamo"))
+    testImplementation(project(":dev-localstack"))
 }

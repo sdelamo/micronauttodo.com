@@ -1,18 +1,9 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.6.2"
+    id 'com.micronauttodo.build.internal.application-module'
 }
-
-version = "0.1"
-group = "com.micronautodo"
-
-repositories {
-    mavenCentral()
-    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 dependencies {
-    runtimeOnly("ch.qos.logback:logback-classic")
+    developmentOnly(project(":dev-security"))
+    developmentOnly(project(":dev-localstack"))
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation(project(":http-websocket-server"))
     implementation(project(":repositories-dynamo"))
@@ -20,32 +11,6 @@ dependencies {
     implementation("io.micronaut.views:micronaut-views-core")
     implementation(project(":repositories-dynamodb-constants"))
 }
-
-task copyJsControllers(type: Copy) {
-    from '../assets/assets/javascripts/controllers'
-    into 'src/main/resources/assets/javascripts/controllers'
-}
-tasks.named('processResources') {
-    it.dependsOn('copyJsControllers')
-}
-
 application {
     mainClass.set("com.micronauttodo.nettyruntime.Application")
 }
-java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
-}
-
-graalvmNative.toolchainDetection = false
-micronaut {
-    runtime("netty")
-    testRuntime("junit5")
-    processing {
-        incremental(true)
-        annotations("com.micronauttodo.nettyruntime.*")
-    }
-}
-
-
-

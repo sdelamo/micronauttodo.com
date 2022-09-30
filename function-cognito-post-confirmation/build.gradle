@@ -1,15 +1,11 @@
 plugins {
+    id 'com.micronauttodo.build.internal.base-module'
     id("io.micronaut.library") version "3.6.2"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 version = "0.1"
 group = "com.micronauttodo"
-
-repositories {
-    mavenCentral()
-    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
-}
 
 dependencies {
     implementation("com.amazonaws:aws-lambda-java-events:3.11.0")
@@ -21,12 +17,6 @@ dependencies {
     runtimeOnly(project(":repositories-dynamo"))
     runtimeOnly("ch.qos.logback:logback-classic")
 }
-
-java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
-}
-
 micronaut {
     runtime("lambda_java")
     testRuntime("junit5")

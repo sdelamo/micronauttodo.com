@@ -9,6 +9,7 @@ import io.micronaut.core.io.Writable;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.security.token.jwt.validator.JwtTokenValidator;
+import io.micronaut.security.token.validator.TokenValidator;
 import io.micronaut.views.turbo.TurboStream;
 import io.micronaut.views.turbo.TurboStreamRenderer;
 import io.micronaut.views.turbo.http.TurboMediaType;
@@ -37,22 +38,21 @@ class TodoWebSocketServer implements WebsocketsTurboStreamPublisher {
     private static final Logger LOG = LoggerFactory.getLogger(TodoWebSocketServer.class);
     private final TurboStreamRenderer turboStreamRenderer;
     private final WebSocketBroadcaster broadcaster;
-    private final JwtTokenValidator jwtTokenValidator;
+    private final TokenValidator tokenValidator;
     private Map<OAuthUser, Set<String>> userSessions = new ConcurrentHashMap<>();
 
     TodoWebSocketServer(TurboStreamRenderer turboStreamRenderer,
                         WebSocketBroadcaster broadcaster,
-                        JwtTokenValidator jwtTokenValidator) {
+                        TokenValidator tokenValidator) {
         this.turboStreamRenderer = turboStreamRenderer;
         this.broadcaster = broadcaster;
-        this.jwtTokenValidator = jwtTokenValidator;
+        this.tokenValidator = tokenValidator;
     }
 
     @OnOpen
     public void onOpen(String token, WebSocketSession session) {
         LOG.info("onOpen {}", token);
-
-        Mono.from(jwtTokenValidator.validateToken(token, null)).subscribe(authentication -> {
+        Mono.from(tokenValidator.validateToken(token, null)).subscribe(authentication -> {
                     OAuthUser user = OauthUserUtils.toOauthUser(authentication);
                     LOG.info("token validated for user {}", user.getSub());
                     userSessions.computeIfPresent(user, (k, sessions) -> {
@@ -75,7 +75,7 @@ class TodoWebSocketServer implements WebsocketsTurboStreamPublisher {
     @OnClose
     public void onClose(String token, WebSocketSession session) {
         LOG.info("onClose token {}", token);
-        Mono.from(jwtTokenValidator.validateToken(token, null)).subscribe(authentication -> {
+        Mono.from(tokenValidator.validateToken(token, null)).subscribe(authentication -> {
             OAuthUser user = OauthUserUtils.toOauthUser(authentication);
             LOG.info("token validated for user {}", user.getSub());
             userSessions.computeIfPresent(user, (k, sessions) -> {

@@ -1,11 +1,7 @@
 plugins {
+    id 'com.micronauttodo.build.internal.base-module'
     id("java-library")
 }
-repositories {
-    mavenCentral()
-    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 dependencies {
     testAnnotationProcessor(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"
@@ -25,11 +21,6 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers")
 
     testRuntimeOnly("ch.qos.logback:logback-classic")
-}
-
-java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
 }
 
 tasks.named("test") {

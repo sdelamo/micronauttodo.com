@@ -1,0 +1,20 @@
+websockets:
+  url: 'localhost:8080/todo'
+micronaut:
+  security:
+    token:
+      jwt:
+        claims-validators:
+          openid-idtoken: false
+microstream:
+  rest:
+    enabled: true
+  storage:
+    todos:
+      storage-directory: '~/micronauttodo.com'
+---
+endpoints:
+  health:
+    details-visible: anonymous
+websockets:
+  url: 'localhost:8080/todo'

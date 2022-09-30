@@ -1,37 +1,14 @@
 plugins {
+    id 'com.micronauttodo.build.internal.lib-module'
     id("application")
-    id("java")
 }
-
-repositories {
-    mavenCentral()
-    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
-}
-
 dependencies {
-    implementation 'software.amazon.awscdk:apigatewayv2-alpha:2.43.1-alpha.0'
-    implementation 'software.amazon.awscdk:apigatewayv2-integrations-alpha:2.43.1-alpha.0'
-
-    implementation platform("io.micronaut:micronaut-bom:$micronautVersion")
+    implementation 'software.amazon.awscdk:apigatewayv2-alpha:2.44.0-alpha.0'
+    implementation 'software.amazon.awscdk:apigatewayv2-integrations-alpha:2.44.0-alpha.0'
     implementation("io.micronaut.aws:micronaut-aws-cdk")
-    implementation("software.amazon.awscdk:aws-cdk-lib:2.43.1")
+    implementation("software.amazon.awscdk:aws-cdk-lib:2.44.0")
     implementation(project(":repositories-dynamodb-constants"))
-
-    testImplementation platform("io.micronaut:micronaut-bom:$micronautVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine")
 }
-
 application {
     mainClass.set("com.micronauttodo.Main")
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
-configurations.all {
-    resolutionStrategy {
-        force "software.amazon.awscdk:aws-cdk-lib:2.43.1"
-    }
 }

@@ -1,0 +1,13 @@
+dynamodb:
+  table-name: 'todo'
+dynamodb-local:
+  host: 'localhost'
+  port: 8000
+websockets:
+  url: 'localhost:8080/todo'
+micronaut:
+  security:
+    token:
+      jwt:
+        claims-validators:
+          openid-idtoken: false

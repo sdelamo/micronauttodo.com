@@ -3,6 +3,7 @@ package com.micronauttodo.repositories.dynamodb;
 import com.micronauttodo.models.OAuthUser;
 import com.micronauttodo.models.WebSocketConnection;
 import com.micronauttodo.repositories.WebSocketConnectionRepository;
+import com.micronauttodo.repositories.dynamodb.constants.DynamoConfiguration;
 import io.micronaut.context.annotation.Requires;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.util.CollectionUtils;

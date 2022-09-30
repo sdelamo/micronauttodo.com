@@ -1,0 +1,12 @@
+plugins {
+    id 'com.micronauttodo.build.internal.lib-module'
+}
+dependencies {
+    implementation(project(":repositories-dynamodb-constants"))
+    implementation("io.micronaut.aws:micronaut-aws-sdk-v2")
+    implementation "software.amazon.awssdk:dynamodb", {
+        exclude group: "software.amazon.awssdk", module: "apache-client"
+        exclude group: "software.amazon.awssdk", module: "netty-nio-client"
+    }
+    implementation "software.amazon.awssdk:url-connection-client"
+}

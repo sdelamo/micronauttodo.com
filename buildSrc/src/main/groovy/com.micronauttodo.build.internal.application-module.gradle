@@ -1,0 +1,30 @@
+plugins {
+    id 'com.micronauttodo.build.internal.base-module'
+    id 'com.github.johnrengelman.shadow'
+    id 'io.micronaut.application'
+}
+dependencies {
+    runtimeOnly("ch.qos.logback:logback-classic")
+}
+
+task copyJsControllers(type: Copy) {
+    from '../assets/assets/javascripts/controllers'
+    into 'src/main/resources/assets/javascripts/controllers'
+}
+tasks.named('processResources') {
+    it.dependsOn('copyJsControllers')
+}
+
+application {
+    mainClass.set("com.micronauttodo.netty.microstream.Application")
+}
+micronaut {
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("com.micronauttodo.netty.microstream.*")
+    }
+}
+
+

@@ -1,5 +1,6 @@
 package com.micronauttodo.repositories.dynamodb;
 
+import com.micronauttodo.repositories.dynamodb.constants.DynamoConfiguration;
 import io.micronaut.core.annotation.NonNull;
 import io.micronaut.core.annotation.Nullable;
 import io.micronaut.core.beans.BeanIntrospection;

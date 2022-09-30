@@ -14,20 +14,18 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-import io.micronaut.security.token.jwt.cookie.JwtCookieTokenReader;
+import io.micronaut.security.token.reader.TokenResolver;
 import io.micronaut.views.View;
 import io.swagger.v3.oas.annotations.Hidden;
 
-import javax.annotation.security.RolesAllowed;
-
 @Controller
 class TodoListController {
-    private final JwtCookieTokenReader tokenReader;
+    private final TokenResolver tokenResolver;
     private final TodoRepository todoRepository;
 
-    public TodoListController(JwtCookieTokenReader tokenReader,
+    public TodoListController(TokenResolver tokenResolver,
                               TodoRepository todoRepository) {
-        this.tokenReader = tokenReader;
+        this.tokenResolver = tokenResolver;
         this.todoRepository = todoRepository;
     }
 
@@ -39,7 +37,7 @@ class TodoListController {
     @ExecuteOn(TaskExecutors.IO)
     HttpResponse<?> index(@NonNull HttpRequest<?> request,
                     @NonNull OAuthUser oAuthUser) {
-        return tokenReader.findToken(request)
+        return tokenResolver.resolveToken(request)
                 .map(token -> HttpResponse.ok(new TodoModel(token, todoRepository.findAll(oAuthUser))))
                 .orElseGet(HttpResponse::serverError);
     }

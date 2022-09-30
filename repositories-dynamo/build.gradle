@@ -11,9 +11,7 @@ dependencies {
         exclude group: "software.amazon.awssdk", module: "netty-nio-client"
     }
     implementation "software.amazon.awssdk:url-connection-client"
-
-
     implementation("com.github.ksuid:ksuid:1.1.1")
-
     testImplementation(project(":services"))
+    testImplementation(project(":dev-localstack"))
 }

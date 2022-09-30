@@ -1,6 +1,6 @@
 package com.micronauttodo.websockets.handler;
 
-import com.micronauttodo.repositories.dynamodb.DynamoConfiguration;
+import com.micronauttodo.repositories.dynamodb.constants.DynamoConfiguration;
 import io.micronaut.context.annotation.Requires;
 import jakarta.inject.Singleton;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;

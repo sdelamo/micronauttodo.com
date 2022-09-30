@@ -11,18 +11,17 @@ import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-import io.micronaut.security.token.jwt.cookie.AccessTokenCookieConfiguration;
-import io.micronaut.security.token.jwt.cookie.JwtCookieTokenReader;
+import io.micronaut.security.token.reader.TokenResolver;
 import io.micronaut.views.View;
 import io.swagger.v3.oas.annotations.Hidden;
 
 @Controller
 class UserShowController {
 
-    private final JwtCookieTokenReader tokenReader;
+    private final TokenResolver tokenResolver;
 
-    UserShowController(JwtCookieTokenReader tokenReader) {
-        this.tokenReader = tokenReader;
+    UserShowController(TokenResolver tokenResolver) {
+        this.tokenResolver = tokenResolver;
     }
 
     @Hidden
@@ -32,7 +31,7 @@ class UserShowController {
     @Produces(MediaType.TEXT_HTML)
     @ExecuteOn(TaskExecutors.IO)
     HttpResponse<?> show(HttpRequest<?> request) {
-        return tokenReader.findToken(request)
+        return tokenResolver.resolveToken(request)
                 .map(token -> HttpResponse.ok(new UserModel(token)))
                 .orElseGet(HttpResponse::serverError);
     }

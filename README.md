@@ -2,7 +2,6 @@ A serverless application built in Java and the [Micronaut Framework](https://mic
 
 https://micronauttodo.com
 
-
 It uses: 
 
 - [Route53](https://aws.amazon.com/route53/)

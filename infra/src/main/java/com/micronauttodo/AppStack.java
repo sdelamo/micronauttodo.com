@@ -9,17 +9,15 @@ import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.customresources.AwsCustomResource;
-import software.amazon.awscdk.customresources.AwsCustomResourcePolicy;
-import software.amazon.awscdk.customresources.AwsSdkCall;
-import software.amazon.awscdk.customresources.PhysicalResourceId;
-import software.amazon.awscdk.customresources.SdkCallsPolicyOptions;
 import software.amazon.awscdk.services.apigateway.DomainNameOptions;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
 import software.amazon.awscdk.services.apigatewayv2.alpha.DomainMappingOptions;
+import software.amazon.awscdk.services.apigatewayv2.alpha.DomainNameAttributes;
+import software.amazon.awscdk.services.apigatewayv2.alpha.HttpApi;
 import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketApi;
 import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketRouteOptions;
 import software.amazon.awscdk.services.apigatewayv2.alpha.WebSocketStage;
+import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.HttpLambdaIntegration;
 import software.amazon.awscdk.services.apigatewayv2.integrations.alpha.WebSocketLambdaIntegration;
 import software.amazon.awscdk.services.certificatemanager.Certificate;
 import software.amazon.awscdk.services.certificatemanager.CertificateValidation;
@@ -76,16 +74,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static software.amazon.awscdk.customresources.AwsCustomResourcePolicy.ANY_RESOURCE;
 import static com.micronauttodo.repositories.dynamodb.constants.DynamoDbConstants.*;
+import static software.amazon.awscdk.services.apigatewayv2.alpha.PayloadFormatVersion.VERSION_1_0;
 
 public class AppStack extends Stack {
 
-    private final static String OAUTH_CLIENT_NAME = "cognito";
+    private static final String OAUTH_CLIENT_NAME = "cognito";
 
-    private final static String LOCALHOST = "http://localhost:8080";
+    private static final String LOCALHOST = "http://localhost:8080";
 
     private static final String HTTPS = "https://";
+    public static final int MEMORY_SIZE = 2024;
+    public static final int TIMEOUT = 20;
 
     private final Project project;
 
@@ -112,7 +112,7 @@ public class AppStack extends Stack {
 
         String subdomain = "webapp";
 
-        LambdaRestApi api = createApi(subdomain, functionNative, cert, zone);
+        LambdaRestApi api = createRestApi(subdomain, functionNative, cert, zone);
 
         Module postConfirmationModule = project.findModuleByName(Main.MODULE_FUNCTION_COGNITO_POST_CONFIRMATION);
         Function postConfirmationFunction = createFunction(environmentVariables(table),
@@ -308,7 +308,31 @@ public class AppStack extends Stack {
                 .build();
     }
 
-    private LambdaRestApi createApi(String subdomain, Function function, Certificate cert, IHostedZone zone) {
+    private HttpApi createHttpApi(String subdomain, Function function, Certificate cert, IHostedZone zone) {
+        HttpLambdaIntegration integration = HttpLambdaIntegration.Builder.create("HttpLambdaIntegration", function)
+                .payloadFormatVersion(VERSION_1_0)
+                .build();
+        String domainName = subdomain != null ?
+                subdomain + "." + project.getDomainName() : project.getDomainName();
+        software.amazon.awscdk.services.apigatewayv2.alpha.IDomainName iDomainName =  software.amazon.awscdk.services.apigatewayv2.alpha.DomainName.fromDomainNameAttributes(this, subdomain + "http-api-domain", DomainNameAttributes.builder()
+                        .name(domainName)
+                .build());
+        HttpApi api = HttpApi.Builder.create(this, "micronaut-function-api")
+                .defaultIntegration(integration)
+                .defaultDomainMapping(DomainMappingOptions.builder()
+                        .domainName(iDomainName)
+                        .build())
+                .build();
+        /*
+        ARecord.Builder.create(this, project.getName() + "-a-record-lambda-http-api")
+                .zone(zone)
+                .recordName(domainName)
+                .target(RecordTarget.fromAlias())
+                .build();
+        */
+        return api;
+    }
+    private LambdaRestApi createRestApi(String subdomain, Function function, Certificate cert, IHostedZone zone) {
         LambdaRestApi api = LambdaRestApi.Builder.create(this, project.getName() + "-lambda-rest-api")
                 .handler(function)
                 .domainName(DomainNameOptions.builder()
@@ -316,7 +340,6 @@ public class AppStack extends Stack {
                         .certificate(cert)
                         .build())
                 .build();
-
         String domainName = subdomain != null ?
                 subdomain + "." + project.getDomainName() : project.getDomainName();
         ARecord.Builder.create(this, project.getName() + "-a-record-lambda-rest-api")
@@ -375,8 +398,8 @@ public class AppStack extends Stack {
                 project.getName() + moduleName + "-java-function")
                 .environment(environmentVariables)
                 .code(Code.fromAsset(functionPath(moduleName, graalvm)))
-                .timeout(Duration.seconds(20))
-                .memorySize(1024)
+                .timeout(Duration.seconds(TIMEOUT))
+                .memorySize(MEMORY_SIZE)
                 .tracing(Tracing.ACTIVE)
                 .logRetention(RetentionDays.FIVE_DAYS);
 
