@@ -13,24 +13,23 @@ import io.micronaut.http.annotation.Consumes;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.server.util.HttpHostResolver;
 import io.micronaut.http.uri.UriBuilder;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-import io.micronaut.views.turbo.TurboStream;
 import io.micronaut.views.turbo.http.TurboMediaType;
 import io.swagger.v3.oas.annotations.Hidden;
 
 import javax.validation.constraints.NotBlank;
-import java.util.Collections;
 
 @Controller
-public class TodoSaveController {
-
+public class TodoSaveController extends AbstractController {
     private final TodoSaveService todoSaveService;
 
-    public TodoSaveController(TodoSaveService todoSaveService) {
+    public TodoSaveController(HttpHostResolver httpHostResolver, TodoSaveService todoSaveService) {
+        super(httpHostResolver);
         this.todoSaveService = todoSaveService;
     }
 
@@ -50,6 +49,6 @@ public class TodoSaveController {
         if (TurboMediaType.acceptsTurboStream(request)) {
             return HttpResponse.ok(TurboUtils.append(new Todo(todoId, todo.getTask())));
         }
-        return HttpResponse.seeOther(UriBuilder.of("/todo").build());
+        return seeOther(request, builder -> builder.path("todo"));
     }
 }

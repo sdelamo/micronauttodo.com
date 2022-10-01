@@ -1,7 +1,6 @@
 package com.micronauttodo.controllers;
 
 import com.micronauttodo.models.OAuthUser;
-import com.micronauttodo.repositories.TodoRepository;
 import com.micronauttodo.services.TodoDeleteService;
 import com.micronauttodo.utils.TurboUtils;
 import io.micronaut.core.annotation.NonNull;
@@ -13,23 +12,23 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.server.util.HttpHostResolver;
 import io.micronaut.http.uri.UriBuilder;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
 import io.micronaut.security.rules.SecurityRule;
-import io.micronaut.views.turbo.TurboStream;
 import io.micronaut.views.turbo.http.TurboMediaType;
 import io.swagger.v3.oas.annotations.Hidden;
 
 import javax.validation.constraints.NotBlank;
 
 @Controller
-class TodoDeleteController {
-
+class TodoDeleteController extends AbstractController {
     private final TodoDeleteService todoDeleteService;
 
-    TodoDeleteController(TodoDeleteService todoDeleteService) {
+    TodoDeleteController(HttpHostResolver httpHostResolver, TodoDeleteService todoDeleteService) {
+        super(httpHostResolver);
         this.todoDeleteService = todoDeleteService;
     }
 
@@ -45,6 +44,6 @@ class TodoDeleteController {
         todoDeleteService.delete(id, oAuthUser);
         return TurboMediaType.acceptsTurboStream(request) ?
                 HttpResponse.ok(TurboUtils.remove(id)) :
-                HttpResponse.seeOther(UriBuilder.of("/todo").build());
+                seeOther(request, builder -> builder.path("todo"));
     }
 }

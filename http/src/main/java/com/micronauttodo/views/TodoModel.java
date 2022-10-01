@@ -18,8 +18,10 @@ public class TodoModel extends Model {
     @NotNull
     private final List<Todo> todos;
 
-    public TodoModel(String accessToken,
+    public TodoModel(String host,
+                     String accessToken,
                      List<Todo> todos) {
+        super(host);
         this.accessToken = accessToken;
         this.todos = todos;
     }

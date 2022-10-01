@@ -7,6 +7,7 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.server.util.HttpHostResolver;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
@@ -18,9 +19,12 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Controller
 class UserShowController {
 
+    private final HttpHostResolver hostResolver;
     private final TokenResolver tokenResolver;
 
-    UserShowController(TokenResolver tokenResolver) {
+    UserShowController(HttpHostResolver hostResolver,
+                       TokenResolver tokenResolver) {
+        this.hostResolver = hostResolver;
         this.tokenResolver = tokenResolver;
     }
 
@@ -32,7 +36,7 @@ class UserShowController {
     @ExecuteOn(TaskExecutors.IO)
     HttpResponse<?> show(HttpRequest<?> request) {
         return tokenResolver.resolveToken(request)
-                .map(token -> HttpResponse.ok(new UserModel(token)))
+                .map(token -> HttpResponse.ok(new UserModel(hostResolver.resolve(request), token)))
                 .orElseGet(HttpResponse::serverError);
     }
 }

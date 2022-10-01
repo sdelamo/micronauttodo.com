@@ -46,9 +46,13 @@ import software.amazon.awscdk.services.dynamodb.AttributeType;
 import software.amazon.awscdk.services.dynamodb.BillingMode;
 import software.amazon.awscdk.services.dynamodb.GlobalSecondaryIndexProps;
 import software.amazon.awscdk.services.dynamodb.Table;
+import software.amazon.awscdk.services.lambda.Alias;
+import software.amazon.awscdk.services.lambda.AliasAttributes;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.Tracing;
+import software.amazon.awscdk.services.lambda.Version;
+import software.amazon.awscdk.services.lambda.VersionAttributes;
 import software.amazon.awscdk.services.logs.RetentionDays;
 import software.amazon.awscdk.services.route53.ARecord;
 import software.amazon.awscdk.services.route53.HostedZone;
@@ -332,22 +336,20 @@ public class AppStack extends Stack {
         */
         return api;
     }
-    private LambdaRestApi createRestApi(String subdomain, Function function, Certificate cert, IHostedZone zone) {
-        LambdaRestApi api = LambdaRestApi.Builder.create(this, project.getName() + "-lambda-rest-api")
+    private LambdaRestApi createRestApi(Module module, Function function) {
+        return createRestApiBuilder(module)
                 .handler(function)
-                .domainName(DomainNameOptions.builder()
-                        .domainName(subdomain + "." + project.getDomainName())
-                        .certificate(cert)
-                        .build())
                 .build();
-        String domainName = subdomain != null ?
-                subdomain + "." + project.getDomainName() : project.getDomainName();
-        ARecord.Builder.create(this, project.getName() + "-a-record-lambda-rest-api")
-                .zone(zone)
-                .recordName(domainName)
-                .target(RecordTarget.fromAlias(new ApiGateway(api)))
+    }
+
+    private LambdaRestApi.Builder createRestApiBuilder(Module module) {
+        return LambdaRestApi.Builder.create(this, project.getName() + "-lambda-rest-api" + module.getName());
+    }
+
+    private LambdaRestApi createRestApi(Module module, Alias alias) {
+        return createRestApiBuilder(module)
+                .handler(alias)
                 .build();
-        return api;
     }
 
 
@@ -365,39 +367,39 @@ public class AppStack extends Stack {
     }
 
     private Function.Builder createFunction(Map<String, String> environmentVariables,
-                                   String moduleName,
+                                   Module module,
                                    String handler) {
-        return createFunction(environmentVariables, ApplicationType.FUNCTION, moduleName, handler, false);
+        return createFunction(environmentVariables, ApplicationType.FUNCTION, module, handler, false);
     }
 
     private Function.Builder createFunctionGraalvm(Map<String, String> environmentVariables,
-                                            String moduleName,
+                                            Module module,
                                             String handler) {
-        return createFunction(environmentVariables, ApplicationType.FUNCTION, moduleName, handler, true);
+        return createFunction(environmentVariables, ApplicationType.FUNCTION, module, handler, true);
     }
 
     private Function.Builder createAppFunction(Map<String, String> environmentVariables,
-                                               String moduleName,
+                                               Module module,
                                                boolean graalvm) {
-        return createFunction(environmentVariables, ApplicationType.DEFAULT, moduleName, null, graalvm);
+        return createFunction(environmentVariables, ApplicationType.DEFAULT, module, null, graalvm);
     }
     private Function.Builder createAppFunction(Map<String, String> environmentVariables,
-                                       String moduleName) {
-        return createFunction(environmentVariables, ApplicationType.DEFAULT, moduleName, null, false);
+                                       Module module) {
+        return createFunction(environmentVariables, ApplicationType.DEFAULT, module, null, false);
 
     }
 
     private Function.Builder createFunction(Map<String, String> environmentVariables,
                                    ApplicationType applicationType,
-                                   String moduleName,
+                                   Module module,
                                    String handler,
                                             boolean graalvm) {
         Function.Builder builder =  MicronautFunction.create(applicationType,
                         graalvm,
                 this,
-                project.getName() + moduleName + "-java-function")
+                project.getName() + module.getName() + "-java-function")
                 .environment(environmentVariables)
-                .code(Code.fromAsset(functionPath(moduleName, graalvm)))
+                .code(Code.fromAsset(functionPath(module.getPath(), graalvm)))
                 .timeout(Duration.seconds(TIMEOUT))
                 .memorySize(MEMORY_SIZE)
                 .tracing(Tracing.ACTIVE)

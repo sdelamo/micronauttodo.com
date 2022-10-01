@@ -12,7 +12,9 @@ public class UserModel extends Model {
     @NotBlank
     private final String accessToken;
 
-    public UserModel(@NonNull String accessToken) {
+    public UserModel(@NonNull String host,
+                     @NonNull String accessToken) {
+        super(host);
         this.accessToken = accessToken;
     }
 

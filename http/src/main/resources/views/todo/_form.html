@@ -1,5 +1,5 @@
 <div th:fragment="form()" xmlns:th="http://www.thymeleaf.org">
-    <form action="/todo"
+    <form th:action="@{/todo}"
           method="post"
           data-controller="reset-form"
           data-action="turbo:submit-end->reset-form#reset">
