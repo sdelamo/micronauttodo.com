@@ -2,11 +2,6 @@ micronaut:
   application:
     name: micronauttodo
 ---
-netty:
-  default:
-    allocator:
-      max-order: 3
----
 assets:
   url: 'https://assets.micronauttodo.com'
 websockets:

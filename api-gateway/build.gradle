@@ -1,0 +1,8 @@
+plugins {
+    id 'com.micronauttodo.build.internal.lib-module'
+}
+
+dependencies {
+    implementation("io.micronaut.aws:micronaut-function-aws-api-proxy")
+    implementation("io.micronaut.views:micronaut-views-thymeleaf")
+}

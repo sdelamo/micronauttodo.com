@@ -10,6 +10,7 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Produces;
+import io.micronaut.http.server.util.HttpHostResolver;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import io.micronaut.security.annotation.Secured;
@@ -20,11 +21,14 @@ import io.swagger.v3.oas.annotations.Hidden;
 
 @Controller
 class TodoListController {
+    private final HttpHostResolver httpHostResolver;
     private final TokenResolver tokenResolver;
     private final TodoRepository todoRepository;
 
-    public TodoListController(TokenResolver tokenResolver,
+    public TodoListController(HttpHostResolver httpHostResolver,
+                              TokenResolver tokenResolver,
                               TodoRepository todoRepository) {
+        this.httpHostResolver = httpHostResolver;
         this.tokenResolver = tokenResolver;
         this.todoRepository = todoRepository;
     }
@@ -38,7 +42,7 @@ class TodoListController {
     HttpResponse<?> index(@NonNull HttpRequest<?> request,
                     @NonNull OAuthUser oAuthUser) {
         return tokenResolver.resolveToken(request)
-                .map(token -> HttpResponse.ok(new TodoModel(token, todoRepository.findAll(oAuthUser))))
+                .map(token -> HttpResponse.ok(new TodoModel(httpHostResolver.resolve(request), token, todoRepository.findAll(oAuthUser))))
                 .orElseGet(HttpResponse::serverError);
     }
 }

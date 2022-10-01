@@ -7,6 +7,9 @@ import io.micronaut.core.annotation.Nullable;
 @Introspected
 public class Model {
 
+    @NonNull
+    private String host;
+
     @Nullable
     private String email;
 
@@ -15,6 +18,16 @@ public class Model {
 
     @NonNull
     private String websocketsUrl = "localhost";
+
+    public Model(String host) {
+        this.host = host;
+    }
+
+    @NonNull
+    public String getHost() {
+
+        return host;
+    }
 
     @Nullable
     public String getEmail() {
