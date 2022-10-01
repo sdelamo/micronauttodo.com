@@ -2,6 +2,9 @@ plugins {
     id 'com.micronauttodo.build.internal.lambda-java-module'
 }
 dependencies {
+    implementation(project(":dev-security"))
+    implementation(project(":api-gateway"))
+
     implementation("io.micronaut.aws:micronaut-function-aws-api-proxy")
     runtimeOnly(project(":http"))
     runtimeOnly(project(":apigateway-websockets"))

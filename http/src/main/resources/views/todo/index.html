@@ -2,15 +2,7 @@
 <html lang="en" th:replace="~{layout :: layout(~{::title},~{::script},~{::main})}" xmlns:th="http://www.thymeleaf.org">
     <head>
         <title th:text="#{todo.list}"></title>
-        <script type="module">
-        const wsUrl = ((window.location.protocol === "https:") ? "wss://" : "ws://") + "[[${websocketsUrl}]]" + "/?token=[[${accessToken}]]";
-        const socket = new WebSocket(wsUrl);
-        socket.addEventListener('open', function (event) {
-            console.log(event);
-        });
-        import hotwiredTurbo from "https://cdn.skypack.dev/pin/@hotwired/turbo@v7.0.0-9XNv1By6uiqRlBzQLO2d/mode=imports,min/optimized/@hotwired/turbo.js"
-        Turbo.session.connectStreamSource(socket);
-    </script>
+        <script></script>
     </head>
     <body>
         <main>

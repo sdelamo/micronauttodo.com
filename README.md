@@ -1,58 +1,20 @@
-A serverless application built in Java and the [Micronaut Framework](https://micronaut.io). 
-
-https://micronauttodo.com
-
-It uses: 
-
-- [Route53](https://aws.amazon.com/route53/)
-- [Amazon API Gateway](https://aws.amazon.com/api-gateway/)
-- [AWS Lambda](https://aws.amazon.com/lambda/)
-- [Amazon Cognito](https://aws.amazon.com/cognito/)
-- [Amazon Certificate Manager](https://aws.amazon.com/certificate-manager/)
-- [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) table for storage.
-
-One lambda is deployed a [GraalVM](https://www.graalvm.org) native executable using AWS Lambda Custom Runtime. 
-
-## Architecture
-
-![](architecture1.jpeg)
-
-![](architecture2.jpeg)
-
-## Modules
-
-![](modules.jpeg)
-
-## Deploy
-
-
-
-## Manual Steps
-
-## expose OAuth Client Secret as an env variable to LAMBDA
-
-![](client-secret.png)
-
-
-
-## A Record for auth subdomain
-
-Create an A Record for `auth.` with an alias to your cognito user pool cloud front distribution
-
-![](cognito-user-pool-cloudfrontdistribution.png)
-
-![](route-53-arecord.png)
-
 ## Requirements
 
 - [AWS CLI](https://aws.amazon.com/cli/)
 - [AWS CDK](https://aws.amazon.com/cdk/)
 - Java 11
-
+- x86 Machine (You will be generating a native image for a custom runtime x86)
 
 ## How to Deploy 
 
-Change `Main.java` to use your project domain name. 
+Make sure you are using java 11
+
+```
+% java -version
+openjdk version "11.0.16" 2022-07-19 LTS
+OpenJDK Runtime Environment Corretto-11.0.16.8.1 (build 11.0.16+8-LTS)
+OpenJDK 64-Bit Server VM Corretto-11.0.16.8.1 (build 11.0.16+8-LTS, mixed mode)
+```
 
 Use AWS CLI to authenticate.
 
@@ -60,22 +22,33 @@ Use AWS CLI to authenticate.
 % aws configure
 AWS Access Key ID [****************]: 
 AWS Secret Access Key [****************]: 
-Default region name [us-east-1]:
+Default region name [us-east-1]: us-east-2
 Default output format [None]:
 ```
+
+**If you have never run CDK in this AWS account, do `cd infra;cdk bootstrap` first.**
 
 Run the release script
 
 ```
 % ./release.sh
-
 ```
 
-## Local Development
-
-Run [DynamoDB Local via Docker](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html)
+You should see: 
 
 ```
-docker run -it --rm -p 8000:8000 amazon/dynamodb-local
+✨  Deployment time: 130.72s
+
+Outputs:
+mntodoAppStack.GraalVMNativeApi = https://oh2vsk1di4.execute-api.us-east-2.amazonaws.com/prod/
+mntodoAppStack.JavaApi = https://x6vd5dxda0.execute-api.us-east-2.amazonaws.com/prod/
+mntodoAppStack.JavaExtraApi = https://8p434p2pif.execute-api.us-east-2.amazonaws.com/prod/
 ```
 
+- Go to the console. 
+- Enable feature for extra lambda.
+- Publish a version
+- Go to `infra/src/main/java/com/micronauttodo/AppStack.java`
+- Search for TODO. comment and uncomment so that the API Gateway point to `prod` alias which should point to the version you published for the extra lambda.
+
+- Visit the url of API Gateway connected to the three lambdas. The three use the same DynamoDB database. Thus, if you create an item in the database you will see it in all of them. 

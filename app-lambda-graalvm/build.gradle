@@ -5,6 +5,8 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":dev-security"))
+    implementation(project(":api-gateway"))
     runtimeOnly(project(":http-graalvm"))
     runtimeOnly(project(":apigateway-websockets"))
     runtimeOnly(project(":repositories-dynamo"))

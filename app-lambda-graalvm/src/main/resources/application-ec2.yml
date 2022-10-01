@@ -9,10 +9,3 @@ micronaut:
     endpoints:
       logout:
         get-allowed: true
-    oauth2:
-      clients:
-        cognito:
-          client-id: ${OAUTH_CLIENT_ID}
-          client-secret: ${OAUTH_CLIENT_SECRET}
-          openid:
-            issuer: https://cognito-idp.${COGNITO_REGION}.amazonaws.com/${COGNITO_POOL_ID}/

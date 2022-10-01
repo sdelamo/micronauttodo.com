@@ -9,7 +9,6 @@ import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.services.apigateway.DomainNameOptions;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
 import software.amazon.awscdk.services.apigatewayv2.alpha.DomainMappingOptions;
 import software.amazon.awscdk.services.apigatewayv2.alpha.DomainNameAttributes;
@@ -101,66 +100,43 @@ public class AppStack extends Stack {
         super(parent, id, props);
         this.project = project;
 
-        IHostedZone zone = findZone();
-        Certificate cert = createCertificate(zone);
-
         Table table = createTable();
 
         Module appModule = project.findModuleByName(Main.MODULE_APP);
-        Function function = createAppFunction(environmentVariables(table), appModule.getName()).build();
+
+        Function function = createAppFunction(environmentVariables(table), appModule).build();
         table.grantReadWriteData(function);
+        LambdaRestApi api = createRestApi(appModule, function);
+
+        Module appModuleExtra = project.findModuleByName(Main.MODULE_APP_EXTRA);
+
+        Function functionExtra = createAppFunction(environmentVariables(table), appModuleExtra).build();
+        table.grantReadWriteData(functionExtra);
+
+        LambdaRestApi apiExtra = createRestApi(appModuleExtra, functionExtra);
+        //TODO comment the above line and uncomment the following
+        /*
+        String versionNumber = "4"; // Change Me
+        Alias alias = Alias.Builder.create(this, "LambdaAlias")
+                .version(Version.fromVersionAttributes(this, "Version", VersionAttributes.builder()
+                                .version(versionNumber)
+                                .lambda(functionExtra)
+                        .build()))
+                .aliasName("prod")
+                .build();
+        LambdaRestApi apiExtra = createRestApi(appModuleExtra, alias);
+        */
+
 
         Module appModuleNative = project.findModuleByName(Main.MODULE_APP_GRAALVM);
-        Function functionNative = createAppFunction(environmentVariables(table), appModuleNative.getName(), true).build();
+        Function functionNative = createAppFunction(environmentVariables(table), appModuleNative, true).build();
         table.grantReadWriteData(functionNative);
 
-        String subdomain = "webapp";
+        LambdaRestApi apiNative = createRestApi(appModuleNative, functionNative);
 
-        LambdaRestApi api = createRestApi(subdomain, functionNative, cert, zone);
-
-        Module postConfirmationModule = project.findModuleByName(Main.MODULE_FUNCTION_COGNITO_POST_CONFIRMATION);
-        Function postConfirmationFunction = createFunction(environmentVariables(table),
-                postConfirmationModule.getName(),
-                functionHandler(postConfirmationModule)
-                ).build();
-        table.grantReadWriteData(postConfirmationFunction);
-
-        String webappDomainName = HTTPS + subdomain + "." + project.getDomainName();
-        Map<String, String> environmentVariables = createAuthorizationServer(cert, zone, postConfirmationFunction, webappDomainName);
-        addEnvironmentVariablesToFunction(environmentVariables, function);
-        addEnvironmentVariablesToFunction(environmentVariables, functionNative);
-
-        Bucket openApiBucket = createBucket(project.getName() + "-s3-openapi");
-        createBucketDeployment(openApiBucket, "openapi");
-        createCloudFrontDistribution("openapi", cert, openApiBucket, zone, "micronaut-todo-1.0.yml");
-
-        Bucket assetsBucket = createBucket(project.getName() + "-s3-assets");
-        addCorsRule(assetsBucket, webappDomainName);
-        createBucketDeployment(assetsBucket, "assets");
-        createCloudFrontDistribution("assets", cert, assetsBucket, zone, "index.html");
-
-        Bucket webBucket = createBucket(project.getName() + "-s3-web");
-        createBucketDeployment(webBucket, "web");
-        createCloudFrontDistribution(null, cert, webBucket, zone, "index.html");
-
-        Module websocketsModule = project.findModuleByName(Main.MODULE_WEBSOCKETS);
-        Function websocketsFunction = createFunction(environmentVariables(table),
-                websocketsModule.getName(),
-                functionHandler(websocketsModule)
-        ).build();
-        table.grantReadWriteData(websocketsFunction);
-
-        WebSocketApi webSocketApi = createWebSocketApi(project.getName(), websocketsFunction);
-        software.amazon.awscdk.services.apigatewayv2.alpha.DomainName webSocketApiDomain =  createWebSocketApiDomain("websockets." + project.getDomainName(),
-                project.getName() + "-apigateway-websockets-domainname",
-                cert,
-                zone);
-        webSocketApi.grantManageConnections(websocketsFunction);
-        WebSocketStage stage = createWebSocketStage(project.getName(), webSocketApi, webSocketApiDomain);
-        stage.grantManagementApiAccess(websocketsFunction);
-        stage.grantManagementApiAccess(function);
-        stage.grantManagementApiAccess(functionNative);
-        output(api);
+        output(api, "JavaApi");
+        output(apiExtra, "JavaExtraApi");
+        output(apiNative, "GraalVMNativeApi");
     }
 
 
@@ -300,15 +276,10 @@ public class AppStack extends Stack {
                 .build();
     }
 
-    private void output(LambdaRestApi api) {
-        CfnOutput.Builder.create(this, "ApiUrl")
-                .exportName("ApiUrl")
+    private void output(LambdaRestApi api, String exportName) {
+        CfnOutput.Builder.create(this, exportName)
+                .exportName(exportName)
                 .value(api.getUrl())
-                .build();
-
-        CfnOutput.Builder.create(this, "DomainUrl")
-                .exportName("DomainUrl")
-                .value(HTTPS + project.getDomainName())
                 .build();
     }
 
@@ -402,7 +373,7 @@ public class AppStack extends Stack {
                 .code(Code.fromAsset(functionPath(module.getPath(), graalvm)))
                 .timeout(Duration.seconds(TIMEOUT))
                 .memorySize(MEMORY_SIZE)
-                .tracing(Tracing.ACTIVE)
+                .tracing(Tracing.DISABLED)
                 .logRetention(RetentionDays.FIVE_DAYS);
 
         return (handler != null) ? builder.handler(handler) : builder;
