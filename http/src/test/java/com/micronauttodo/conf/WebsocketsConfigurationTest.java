@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Property(name = "websockets.url", value = "websockets.micronauttodo.com")
+@Property(name = "websockets.url", value = "wss://websockets.micronauttodo.com")
 @MicronautTest(startApplication = false)
 class WebsocketsConfigurationTest {
 
@@ -22,6 +22,6 @@ class WebsocketsConfigurationTest {
 
     @Test
     void immutableConfigurationViaProperty(WebsocketsConfiguration websocketsConfiguration) {
-        assertEquals("websockets.micronauttodo.com", websocketsConfiguration.getUrl());
+        assertEquals("wss://websockets.micronauttodo.com", websocketsConfiguration.getUrl());
     }
 }

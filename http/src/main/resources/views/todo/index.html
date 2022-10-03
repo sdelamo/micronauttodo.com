@@ -3,7 +3,7 @@
     <head>
         <title th:text="#{todo.list}"></title>
         <script type="module">
-        const wsUrl = ((window.location.protocol === "https:") ? "wss://" : "ws://") + "[[${websocketsUrl}]]" + "/?token=[[${accessToken}]]";
+        const wsUrl = "[[${websocketsUrl}]]" + "/?token=[[${accessToken}]]";
         const socket = new WebSocket(wsUrl);
         socket.addEventListener('open', function (event) {
             console.log(event);

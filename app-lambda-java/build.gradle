@@ -4,6 +4,7 @@ plugins {
 dependencies {
     implementation("io.micronaut.aws:micronaut-function-aws-api-proxy")
     runtimeOnly(project(":http"))
+    runtimeOnly(project(":api-gateway"))
     runtimeOnly(project(":apigateway-websockets"))
     runtimeOnly(project(":repositories-dynamo"))
 }

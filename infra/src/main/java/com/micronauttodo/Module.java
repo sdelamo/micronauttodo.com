@@ -3,28 +3,27 @@ package com.micronauttodo;
 import io.micronaut.core.annotation.Introspected;
 
 @Introspected
-public class Module {
+public class Module implements HasSubdomain {
     private final String name;
 
-    private final String path;
+    private final String subdomain;
+
     private final String packageName;
 
-    public Module(String name, String packageName) {
-        this(name, packageName, name);
-    }
-
-    public Module(String name, String packageName, String path) {
+    public Module(String name,
+                  String subdomain,
+                  String packageName) {
         this.name = name;
+        this.subdomain = subdomain;
         this.packageName = packageName;
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getSubdomain() {
+        return subdomain;
     }
 
     public String getPackageName() {

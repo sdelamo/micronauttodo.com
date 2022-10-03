@@ -12,5 +12,6 @@ import javax.validation.constraints.Pattern;
 public interface WebsocketsConfiguration {
     @NotBlank
     @NonNull
+    @Pattern(regexp = "wss://.*")
     String getUrl();
 }

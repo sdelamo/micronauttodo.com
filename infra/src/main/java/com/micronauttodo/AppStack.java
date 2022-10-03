@@ -5,6 +5,7 @@ import io.micronaut.aws.cdk.function.MicronautFunctionFile;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.starter.application.ApplicationType;
 import io.micronaut.starter.options.BuildTool;
+import software.amazon.awscdk.App;
 import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
@@ -30,6 +31,7 @@ import software.amazon.awscdk.services.cloudfront.SourceConfiguration;
 import software.amazon.awscdk.services.cloudfront.ViewerCertificate;
 import software.amazon.awscdk.services.cloudfront.ViewerCertificateOptions;
 import software.amazon.awscdk.services.cloudfront.ViewerProtocolPolicy;
+import software.amazon.awscdk.services.cognito.CognitoDomainOptions;
 import software.amazon.awscdk.services.cognito.CustomDomainOptions;
 import software.amazon.awscdk.services.cognito.OAuthFlows;
 import software.amazon.awscdk.services.cognito.OAuthScope;
@@ -46,13 +48,9 @@ import software.amazon.awscdk.services.dynamodb.AttributeType;
 import software.amazon.awscdk.services.dynamodb.BillingMode;
 import software.amazon.awscdk.services.dynamodb.GlobalSecondaryIndexProps;
 import software.amazon.awscdk.services.dynamodb.Table;
-import software.amazon.awscdk.services.lambda.Alias;
-import software.amazon.awscdk.services.lambda.AliasAttributes;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.Tracing;
-import software.amazon.awscdk.services.lambda.Version;
-import software.amazon.awscdk.services.lambda.VersionAttributes;
 import software.amazon.awscdk.services.logs.RetentionDays;
 import software.amazon.awscdk.services.route53.ARecord;
 import software.amazon.awscdk.services.route53.HostedZone;
@@ -75,9 +73,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static com.micronauttodo.repositories.dynamodb.constants.DynamoDbConstants.*;
 import static software.amazon.awscdk.services.apigatewayv2.alpha.PayloadFormatVersion.VERSION_1_0;
 
@@ -101,75 +98,133 @@ public class AppStack extends Stack {
         super(parent, id, props);
         this.project = project;
 
-        IHostedZone zone = findZone();
-        Certificate cert = createCertificate(zone);
+        String region = props.getEnv().getRegion();
 
+        IHostedZone zone = null;
+        Certificate cert = null;
+
+        if (StringUtils.isNotEmpty(project.getDomainName())) {
+            zone = findZone();
+            cert = createCertificate(zone);
+        }
         Table table = createTable();
 
-        Module appModule = project.findModuleByName(Main.MODULE_APP);
-        Function function = createAppFunction(environmentVariables(table), appModule.getName()).build();
-        table.grantReadWriteData(function);
+        Function websocketsFunction = createFunction(environmentVariables(table),
+                project.getWebsockets(),
+                functionHandler(project.getWebsockets())
+        ).build();
+        table.grantReadWriteData(websocketsFunction);
+        WebSocketApi webSocketApi = createWebSocketApi(project.getName(), websocketsFunction);
 
-        Module appModuleNative = project.findModuleByName(Main.MODULE_APP_GRAALVM);
-        Function functionNative = createAppFunction(environmentVariables(table), appModuleNative.getName(), true).build();
-        table.grantReadWriteData(functionNative);
-
-        String subdomain = "webapp";
-
-        LambdaRestApi api = createRestApi(subdomain, functionNative, cert, zone);
-
-        Module postConfirmationModule = project.findModuleByName(Main.MODULE_FUNCTION_COGNITO_POST_CONFIRMATION);
-        Function postConfirmationFunction = createFunction(environmentVariables(table),
-                postConfirmationModule.getName(),
-                functionHandler(postConfirmationModule)
-                ).build();
-        table.grantReadWriteData(postConfirmationFunction);
-
-        String webappDomainName = HTTPS + subdomain + "." + project.getDomainName();
-        Map<String, String> environmentVariables = createAuthorizationServer(cert, zone, postConfirmationFunction, webappDomainName);
-        addEnvironmentVariablesToFunction(environmentVariables, function);
-        addEnvironmentVariablesToFunction(environmentVariables, functionNative);
+        Map<String, String> functionEnvironmentVariables = environmentVariables(table);
+        functionEnvironmentVariables.put("WEBSOCKETS_URL",
+                moduleDomain(project, project.getWebsockets()).orElseGet(webSocketApi::getApiEndpoint));
 
         Bucket openApiBucket = createBucket(project.getName() + "-s3-openapi");
-        createBucketDeployment(openApiBucket, "openapi");
-        createCloudFrontDistribution("openapi", cert, openApiBucket, zone, "micronaut-todo-1.0.yml");
+        createBucketDeployment(openApiBucket, project.getOpenApi().getSubdomain());
+        CloudFrontWebDistribution openApiCloudFront = createCloudFrontDistribution(project.getOpenApi(), cert, openApiBucket, zone, project.getOpenApi().getDefaultRootObject());
 
         Bucket assetsBucket = createBucket(project.getName() + "-s3-assets");
-        addCorsRule(assetsBucket, webappDomainName);
         createBucketDeployment(assetsBucket, "assets");
-        createCloudFrontDistribution("assets", cert, assetsBucket, zone, "index.html");
+        CloudFrontWebDistribution assetsCloudFront = createCloudFrontDistribution(project.getAssets(), cert, assetsBucket, zone, project.getAssets().getDefaultRootObject());
+
+        functionEnvironmentVariables.put("ASSETS_URL",
+                moduleDomain(project, project.getAssets()).map(url ->
+                        HTTPS + url
+                ).orElseGet(() -> HTTPS + assetsCloudFront.getDistributionDomainName()));
 
         Bucket webBucket = createBucket(project.getName() + "-s3-web");
         createBucketDeployment(webBucket, "web");
-        createCloudFrontDistribution(null, cert, webBucket, zone, "index.html");
+        CloudFrontWebDistribution webCloudFront = createCloudFrontDistribution(project.getWeb(), cert, webBucket, zone, project.getWeb().getDefaultRootObject());
 
-        Module websocketsModule = project.findModuleByName(Main.MODULE_WEBSOCKETS);
-        Function websocketsFunction = createFunction(environmentVariables(table),
-                websocketsModule.getName(),
-                functionHandler(websocketsModule)
+        boolean graalVM = project.getApp() instanceof GraalModule;
+        Function function = createAppFunction(functionEnvironmentVariables, project.getApp(), graalVM).build();
+        table.grantReadWriteData(function);
+
+        LambdaRestApi api = createRestApi(project.getApp(), function, cert, zone);
+
+        Function postConfirmationFunction = createFunction(environmentVariables(table),
+                project.getAuth(),
+                functionHandler(project.getAuth())
         ).build();
-        table.grantReadWriteData(websocketsFunction);
+        table.grantReadWriteData(postConfirmationFunction);
 
-        WebSocketApi webSocketApi = createWebSocketApi(project.getName(), websocketsFunction);
-        software.amazon.awscdk.services.apigatewayv2.alpha.DomainName webSocketApiDomain =  createWebSocketApiDomain("websockets." + project.getDomainName(),
-                project.getName() + "-apigateway-websockets-domainname",
-                cert,
-                zone);
+
+        String amazonApiGatewayAppUrl = "https://o30lwrfgse.execute-api.eu-west-3.amazonaws.com/prod/"; //TODO delete
+        List<String> domains = Arrays.asList(
+                //TODO api.getUrl(),
+                amazonApiGatewayAppUrl, //TODO delete
+                LOCALHOST
+        );
+        moduleDomain(project, project.getApp()).ifPresent(domains::add);
+
+        Map<String, String> environmentVariables = createAuthorizationServer(cert,
+                zone,
+                postConfirmationFunction,
+                domains,
+                region,
+                project.getName());
+        addEnvironmentVariablesToFunction(environmentVariables, function);
+
+        Optional<String> websocketDomainOptional = moduleDomain(project, project.getWebsockets());
+        software.amazon.awscdk.services.apigatewayv2.alpha.DomainName webSocketApiDomain = null;
+        if (websocketDomainOptional.isPresent()) {
+            webSocketApiDomain = createWebSocketApiDomain(websocketDomainOptional.get(),
+                    project.getName() + "-apigateway-websockets-domainname",
+                    cert,
+                    zone);
+        }
         webSocketApi.grantManageConnections(websocketsFunction);
         WebSocketStage stage = createWebSocketStage(project.getName(), webSocketApi, webSocketApiDomain);
         stage.grantManagementApiAccess(websocketsFunction);
         stage.grantManagementApiAccess(function);
-        stage.grantManagementApiAccess(functionNative);
-        output(api);
+
+        addCorsRule(assetsBucket, moduleDomain(project, project.getApp())
+                .map(url -> HTTPS + url)
+                        .orElseGet(() -> amazonApiGatewayAppUrl.replaceAll("/prod/", "")));//TODO delete
+                //TODO .orElseGet(api::getUrl));
+
+        CfnOutput.Builder.create(this, "AmazonApiGatewayAppUrl")
+                .exportName("AmazonApiGatewayAppUrl")
+                .value(api.getUrl())
+                .build();
+
+        CfnOutput.Builder.create(this, "AmazonApiGatewayWebSocketsApiEndpoint")
+                .exportName("AmazonApiGatewayWebSocketsApiEndpoint")
+                .value(webSocketApi.getApiEndpoint())
+                .build();
+
+        CfnOutput.Builder.create(this, "OpenApiCloudFrontDomainName")
+                .exportName("OpenApiCloudFrontDomainName")
+                .value(openApiCloudFront.getDistributionDomainName())
+                .build();
+
+        CfnOutput.Builder.create(this, "AssetsCloudFrontDomainName")
+                .exportName("AssetsCloudFrontDomainName")
+                .value(assetsCloudFront.getDistributionDomainName())
+                .build();
+
+        CfnOutput.Builder.create(this, "WebCloudFrontDomainName")
+                .exportName("WebCloudFrontDomainName")
+                .value(webCloudFront.getDistributionDomainName())
+                .build();
     }
 
+    private static Optional<String> moduleDomain(Project project, HasSubdomain module) {
+        if (project.getDomainName() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(module.getSubdomain() != null ?
+                module.getSubdomain() + "." + project.getDomainName() :
+                project.getDomainName());
+    }
 
     private static Map<String, String> environmentVariables(Table table) {
         Map<String, String> environmentVariables = new HashMap<>();
         environmentVariables.put("DYNAMODB_TABLE_NAME", table.getTableName());
         // https://aws.amazon.com/blogs/compute/optimizing-aws-lambda-function-performance-for-java/
         environmentVariables.put("JAVA_TOOL_OPTIONS", "-XX:+TieredCompilation -XX:TieredStopAtLevel=1");
-        return  environmentVariables;
+        return environmentVariables;
     }
 
     private void addCorsRule(Bucket bucket, String allowedOrigin) {
@@ -182,7 +237,7 @@ public class AppStack extends Stack {
 
     private void createBucketDeployment(Bucket bucket, String moduleName) {
         BucketDeployment.Builder.create(this, project.getName() + "-s3-deployment-" + moduleName)
-                .sources(Collections.singletonList(Source.asset("../"+ moduleName)))
+                .sources(Collections.singletonList(Source.asset("../" + moduleName)))
                 .destinationBucket(bucket)
                 .build();
     }
@@ -193,9 +248,9 @@ public class AppStack extends Stack {
                                                                                            IHostedZone zone) {
         software.amazon.awscdk.services.apigatewayv2.alpha.DomainName domainName =
                 software.amazon.awscdk.services.apigatewayv2.alpha.DomainName.Builder.create(this, id)
-                .certificate(cert)
-                .domainName(domain)
-                .build();
+                        .certificate(cert)
+                        .domainName(domain)
+                        .build();
         ApiGatewayv2DomainProperties domainProperties =
                 new ApiGatewayv2DomainProperties(domainName.getRegionalDomainName(), domainName.getRegionalHostedZoneId());
         ARecord.Builder.create(this, project.getName() + "-a-record-websockets-api")
@@ -223,33 +278,33 @@ public class AppStack extends Stack {
     private WebSocketStage createWebSocketStage(String projectName,
                                                 WebSocketApi webSocketApi,
                                                 software.amazon.awscdk.services.apigatewayv2.alpha.DomainName domainName) {
-        return WebSocketStage.Builder.create(this, projectName + "-function-api-websocket-stage-production")
+        WebSocketStage.Builder builder = WebSocketStage.Builder.create(this, projectName + "-function-api-websocket-stage-production")
                 .webSocketApi(webSocketApi)
                 .stageName("production")
-                .autoDeploy(true)
-                .domainMapping(DomainMappingOptions.builder()
-                        .domainName(domainName)
-                        .build())
-                .build();
+                .autoDeploy(true);
+        if (domainName != null) {
+            builder.domainMapping(DomainMappingOptions.builder()
+                    .domainName(domainName)
+                    .build());
+        }
+        return builder.build();
     }
 
     private Bucket createBucket(String id) {
         return Bucket.Builder.create(this, id).build();
     }
 
-    private CloudFrontWebDistribution createCloudFrontDistribution(String subdomain,
+    private CloudFrontWebDistribution createCloudFrontDistribution(StaticWebsite module,
                                                                    Certificate certificate,
                                                                    Bucket bucket,
                                                                    IHostedZone zone,
                                                                    String defaultRootObject) {
-        String domainName = subdomain != null ?
-                subdomain + "." + project.getDomainName() : project.getDomainName();
-        CloudFrontWebDistribution cloudFrontWebDistribution = CloudFrontWebDistribution.Builder.create(this,
-                project.getName() + "-" + subdomain  + "-cloudfront-distribution")
+        CloudFrontWebDistribution.Builder builder = CloudFrontWebDistribution.Builder.create(this,
+                        project.getName() + "-" + module.getSubdomain() + "-cloudfront-distribution")
                 .originConfigs(Collections.singletonList(SourceConfiguration.builder()
                         .s3OriginSource(S3OriginConfig.builder()
                                 .s3BucketSource(bucket)
-                                .originAccessIdentity(OriginAccessIdentity.Builder.create(this, project.getName() + "-" + subdomain + "-origin-access-identity")
+                                .originAccessIdentity(OriginAccessIdentity.Builder.create(this, project.getName() + "-" + module.getSubdomain() + "-origin-access-identity")
                                         .build())
                                 .build())
                         .behaviors(Collections.singletonList(Behavior.builder()
@@ -258,16 +313,22 @@ public class AppStack extends Stack {
                                 .allowedMethods(CloudFrontAllowedMethods.GET_HEAD_OPTIONS)
                                 .build()))
                         .build()))
-                .defaultRootObject(defaultRootObject)
-                .viewerCertificate(ViewerCertificate.fromAcmCertificate(certificate, ViewerCertificateOptions.builder()
-                        .aliases(Collections.singletonList(domainName))
-                        .build()))
-                .build();
-        ARecord.Builder.create(this, project.getName() + "-a-record-" + "-" + subdomain  + "-cloudfront-distribution")
-                .zone(zone)
-                .recordName(domainName)
-                .target(RecordTarget.fromAlias(new CloudFrontTarget(cloudFrontWebDistribution)))
-                .build();
+                .defaultRootObject(defaultRootObject);
+
+        Optional<String> domainName = moduleDomain(project, module);
+        if (domainName.isPresent()) {
+            builder.viewerCertificate(ViewerCertificate.fromAcmCertificate(certificate,
+                    ViewerCertificateOptions.builder()
+                            .aliases(Collections.singletonList(domainName.get()))
+                            .build()));
+        }
+        CloudFrontWebDistribution cloudFrontWebDistribution = builder.build();
+        domainName.ifPresent(url ->
+                ARecord.Builder.create(this, project.getName() + "-a-record-" + "-" + module.getSubdomain() + "-cloudfront-distribution")
+                        .zone(zone)
+                        .recordName(url)
+                        .target(RecordTarget.fromAlias(new CloudFrontTarget(cloudFrontWebDistribution)))
+                        .build());
         return cloudFrontWebDistribution;
     }
 
@@ -300,26 +361,14 @@ public class AppStack extends Stack {
                 .build();
     }
 
-    private void output(LambdaRestApi api) {
-        CfnOutput.Builder.create(this, "ApiUrl")
-                .exportName("ApiUrl")
-                .value(api.getUrl())
-                .build();
-
-        CfnOutput.Builder.create(this, "DomainUrl")
-                .exportName("DomainUrl")
-                .value(HTTPS + project.getDomainName())
-                .build();
-    }
-
     private HttpApi createHttpApi(String subdomain, Function function, Certificate cert, IHostedZone zone) {
         HttpLambdaIntegration integration = HttpLambdaIntegration.Builder.create("HttpLambdaIntegration", function)
                 .payloadFormatVersion(VERSION_1_0)
                 .build();
         String domainName = subdomain != null ?
                 subdomain + "." + project.getDomainName() : project.getDomainName();
-        software.amazon.awscdk.services.apigatewayv2.alpha.IDomainName iDomainName =  software.amazon.awscdk.services.apigatewayv2.alpha.DomainName.fromDomainNameAttributes(this, subdomain + "http-api-domain", DomainNameAttributes.builder()
-                        .name(domainName)
+        software.amazon.awscdk.services.apigatewayv2.alpha.IDomainName iDomainName = software.amazon.awscdk.services.apigatewayv2.alpha.DomainName.fromDomainNameAttributes(this, subdomain + "http-api-domain", DomainNameAttributes.builder()
+                .name(domainName)
                 .build());
         HttpApi api = HttpApi.Builder.create(this, "micronaut-function-api")
                 .defaultIntegration(integration)
@@ -336,32 +385,40 @@ public class AppStack extends Stack {
         */
         return api;
     }
-    private LambdaRestApi createRestApi(Module module, Function function) {
-        return createRestApiBuilder(module)
-                .handler(function)
-                .build();
+
+    boolean hasDomain(Certificate cert, IHostedZone zone) {
+        return (cert != null && zone != null);
     }
 
-    private LambdaRestApi.Builder createRestApiBuilder(Module module) {
-        return LambdaRestApi.Builder.create(this, project.getName() + "-lambda-rest-api" + module.getName());
+    private LambdaRestApi createRestApi(Module module, Function function, Certificate cert, IHostedZone zone) {
+        LambdaRestApi.Builder builder = LambdaRestApi.Builder.create(this, project.getName() + "-lambda-rest-api")
+                .handler(function);
+        Optional<String> domainName = moduleDomain(project, module);
+        if (domainName.isPresent()) {
+            builder = builder.domainName(DomainNameOptions.builder()
+                            .domainName(domainName.get())
+                            .certificate(cert)
+                            .build());
+        }
+        LambdaRestApi api = builder.build();
+        domainName.ifPresent(url ->
+            ARecord.Builder.create(this, project.getName() + "-a-record-lambda-rest-api")
+                    .zone(zone)
+                    .recordName(url)
+                    .target(RecordTarget.fromAlias(new ApiGateway(api))));
+        return api;
     }
-
-    private LambdaRestApi createRestApi(Module module, Alias alias) {
-        return createRestApiBuilder(module)
-                .handler(alias)
-                .build();
-    }
-
 
     private Map<String, String> createAuthorizationServer(Certificate cert,
                                                           IHostedZone zone,
                                                           Function postConfirmationFunction,
-                                                          String webappDomainName) {
-        UserPool userPool = createUserPool(cert, zone, postConfirmationFunction);
-        UserPoolClient userPoolClient = createUserPoolClient(webappDomainName, userPool);
-
+                                                          List<String> domains,
+                                                          String region,
+                                                          String domainPrefix) {
+        UserPool userPool = createUserPool(cert, zone, postConfirmationFunction, domainPrefix);
+        UserPoolClient userPoolClient = createUserPoolClient(userPool, domains);
         return Map.of("COGNITO_POOL_ID", userPool.getUserPoolId(),
-                "COGNITO_REGION", "us-east-1",
+                "COGNITO_REGION", region,
                     "OAUTH_CLIENT_ID", userPoolClient.getUserPoolClientId(),
                 "OAUTH_CLIENT_SECRET", userPoolClient.getUserPoolClientSecret().unsafeUnwrap());
     }
@@ -399,7 +456,7 @@ public class AppStack extends Stack {
                 this,
                 project.getName() + module.getName() + "-java-function")
                 .environment(environmentVariables)
-                .code(Code.fromAsset(functionPath(module.getPath(), graalvm)))
+                .code(Code.fromAsset(functionPath(module.getName(), graalvm)))
                 .timeout(Duration.seconds(TIMEOUT))
                 .memorySize(MEMORY_SIZE)
                 .tracing(Tracing.ACTIVE)
@@ -460,7 +517,8 @@ public class AppStack extends Stack {
 
     public UserPool createUserPool(Certificate cert,
                                    IHostedZone zone,
-                                   Function postConfirmationFunction) {
+                                   Function postConfirmationFunction,
+                                   String domainPrefix) {
         UserPool userPool = UserPool.Builder.create(this, project.getName() + "-userpool")
                 .signInAliases(SignInAliases.builder()
                         .phone(false)
@@ -472,7 +530,15 @@ public class AppStack extends Stack {
         userPool.addTrigger(UserPoolOperation.POST_CONFIRMATION, postConfirmationFunction);
 
         //Uncommented after you have run cdk deploy once and an A record exists for the zone
-        addDomain(cert, zone, userPool);
+        if (hasDomain(cert, zone)) {
+        //    addDomain(cert, zone, userPool);
+        } else {
+            userPool.addDomain(project.getName() + "-userpool-domain", UserPoolDomainOptions.builder()
+                            .cognitoDomain(CognitoDomainOptions.builder()
+                                    .domainPrefix(domainPrefix)
+                                    .build())
+                    .build());
+        }
         return userPool;
     }
 
@@ -506,7 +572,7 @@ public class AppStack extends Stack {
                 .build();
     }
 
-    private UserPoolClient createUserPoolClient(String webappDomainName, UserPool userPool) {
+    private UserPoolClient createUserPoolClient(UserPool userPool, List<String> domains) {
         UserPoolClientOptions clientOptions = UserPoolClientOptions.builder()
                 .generateSecret(true)
                 .oAuth(OAuthSettings.builder()
@@ -516,14 +582,37 @@ public class AppStack extends Stack {
                         .flows(OAuthFlows.builder()
                                 .authorizationCodeGrant(true)
                                 .build())
-                        .callbackUrls(Stream.of(webappDomainName, LOCALHOST)
-                                .map(domain -> domain + "/oauth/callback/" + OAUTH_CLIENT_NAME)
-                                .collect(Collectors.toList()))
-                        .logoutUrls(Stream.of(webappDomainName, LOCALHOST)
-                                .map(domain -> domain + "/logout")
-                                .collect(Collectors.toList()))
+                        .callbackUrls(callbackUrls(domains))
+                        .logoutUrls(logoutUrls(domains))
                         .build())
                 .build();
         return userPool.addClient(project.getName() + "-userpool-client", clientOptions);
+    }
+
+    protected static List<String> logoutUrls(List<String> domains) {
+        return domains.stream()
+                .map(AppStack::logoutUrl)
+                .collect(Collectors.toList());
+    }
+
+    protected static List<String> callbackUrls(List<String> domains) {
+        return domains.stream()
+                .map(AppStack::callbackUrl)
+                .collect(Collectors.toList());
+    }
+    private static String callbackUrl(String base) {
+        String url = base;
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+        return url + "oauth/callback/" + OAUTH_CLIENT_NAME;
+    }
+
+    private static String logoutUrl(String base) {
+        String url = base;
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+        return url + "logout";
     }
 }

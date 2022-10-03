@@ -11,18 +11,34 @@ public class Project {
 
     private final String domainName;
 
-    private final Collection<Module> modules;
+    private final Module app;
+
+    private final Module websockets;
+
+    private final Module auth;
+
+    private final StaticWebsite assets;
+
+    private final StaticWebsite openApi;
+
+    private final StaticWebsite web;
 
     public Project(String name,
                    String domainName,
-                   Collection<Module> modules) {
+                   Module app,
+                   Module websockets,
+                   Module auth,
+                   StaticWebsite assets,
+                   StaticWebsite openApi,
+                   StaticWebsite web) {
         this.name = name;
         this.domainName = domainName;
-        this.modules = modules;
-    }
-
-    public Collection<Module> getModules() {
-        return modules;
+        this.app = app;
+        this.websockets = websockets;
+        this.auth = auth;
+        this.assets = assets;
+        this.openApi = openApi;
+        this.web = web;
     }
 
     public String getName() {
@@ -33,11 +49,27 @@ public class Project {
         return domainName;
     }
 
-    public Module findModuleByName(String name) throws ConfigurationException {
-        return getModules()
-                .stream()
-                .filter(p -> p.getName().equals(name))
-                .findFirst()
-                .orElseThrow(() -> new ConfigurationException("Module function-cognito-post-confirmation does not exists"));
+    public Module getApp() {
+        return app;
+    }
+
+    public Module getWebsockets() {
+        return websockets;
+    }
+
+    public StaticWebsite getAssets() {
+        return assets;
+    }
+
+    public StaticWebsite getOpenApi() {
+        return openApi;
+    }
+
+    public StaticWebsite getWeb() {
+        return web;
+    }
+
+    public Module getAuth() {
+        return auth;
     }
 }

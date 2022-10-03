@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+    implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut.security:micronaut-security-oauth2")
     implementation("io.micronaut.aws:micronaut-function-aws-api-proxy")
     implementation("io.micronaut.views:micronaut-views-thymeleaf")
 }
