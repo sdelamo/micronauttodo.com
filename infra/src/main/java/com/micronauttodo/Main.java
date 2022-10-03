@@ -29,7 +29,7 @@ public class Main {
                 new Module(MODULE_FUNCTION_COGNITO_POST_CONFIRMATION, SUBDOMAIN_AUTH,ROOT_PACKAGE + ".cognitopostconfirmation"),
                 new StaticWebsite(SUBDOMAIN_ASSETS, "index.html"),
                 new StaticWebsite(SUBDOMAIN_OPENAPI, "micronaut-todo-1.0.yml"),
-                new StaticWebsite(SUBDOMAIN_WEB, "index.html")
+                new StaticWebsite(null, "index.html")
         );
         new AppStack(project, app, project.getName() + "AppStack", StackProps.builder()
                 .env(Environment.builder()
