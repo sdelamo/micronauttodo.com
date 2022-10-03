@@ -68,6 +68,7 @@ import software.amazon.awscdk.services.s3.deployment.Source;
 import software.amazon.awscdk.services.ses.CfnEmailIdentity;
 import software.constructs.Construct;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -149,14 +150,12 @@ public class AppStack extends Stack {
         ).build();
         table.grantReadWriteData(postConfirmationFunction);
 
-
-        String amazonApiGatewayAppUrl = "https://o30lwrfgse.execute-api.eu-west-3.amazonaws.com/prod/"; //TODO delete
-        List<String> domains = Arrays.asList(
-                //TODO api.getUrl(),
-                amazonApiGatewayAppUrl, //TODO delete
-                LOCALHOST
-        );
-        moduleDomain(project, project.getApp()).ifPresent(domains::add);
+        List<String> domains = new ArrayList<>();
+        domains.add(LOCALHOST);
+        //domains.add(api.getUrl());
+        moduleDomain(project, project.getApp())
+                .map(url -> HTTPS + url)
+                .ifPresent(domains::add);
 
         Map<String, String> environmentVariables = createAuthorizationServer(cert,
                 zone,
@@ -179,10 +178,10 @@ public class AppStack extends Stack {
         stage.grantManagementApiAccess(websocketsFunction);
         stage.grantManagementApiAccess(function);
 
-        addCorsRule(assetsBucket, moduleDomain(project, project.getApp())
+        moduleDomain(project, project.getApp())
                 .map(url -> HTTPS + url)
-                        .orElseGet(() -> amazonApiGatewayAppUrl.replaceAll("/prod/", "")));//TODO delete
                 //TODO .orElseGet(api::getUrl));
+                .ifPresent(url -> addCorsRule(assetsBucket, url));
 
         CfnOutput.Builder.create(this, "AmazonApiGatewayAppUrl")
                 .exportName("AmazonApiGatewayAppUrl")
@@ -531,7 +530,7 @@ public class AppStack extends Stack {
 
         //Uncommented after you have run cdk deploy once and an A record exists for the zone
         if (hasDomain(cert, zone)) {
-        //    addDomain(cert, zone, userPool);
+            //addDomain(cert, zone, userPool);
         } else {
             userPool.addDomain(project.getName() + "-userpool-domain", UserPoolDomainOptions.builder()
                             .cognitoDomain(CognitoDomainOptions.builder()

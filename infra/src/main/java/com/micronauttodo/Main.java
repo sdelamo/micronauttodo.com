@@ -11,7 +11,7 @@ public class Main {
     public static final String MODULE_FUNCTION_COGNITO_POST_CONFIRMATION = "function-cognito-post-confirmation";
     private static final String ROOT_PACKAGE = "com.micronauttodo";
     private static final String PROJECT_NAME = "mntodo";
-    private static final String PROJECT_DOMAIN = null;
+    private static final String PROJECT_DOMAIN = "micronauttodo.com";
     public static final String SUBDOMAIN_WEBAPP = "webapp";
     public static final String SUBDOMAIN_AUTH = "auth";
     public static final String SUBDOMAIN_WEBSOCKET = "websocket";
