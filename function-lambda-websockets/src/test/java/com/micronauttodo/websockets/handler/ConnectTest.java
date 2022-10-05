@@ -25,7 +25,7 @@ class ConnectTest extends AbstractTest {
     private static final String API_ID = "3opvlw0fpd";
     public static final String PRODUCTION = "production";
     public static final String CONNECTION_ID = "Xn48TcG2IAMCFig=";
-    public static final String DOMAIN_NAME = "websockets.micronauttodo.com";
+    public static final String DOMAIN_NAME = "websockets.serverlesstodo.com";
 
     @Test
     void connectCreatesAnEntryInTheDabase() throws IOException {
