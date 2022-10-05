@@ -50,6 +50,7 @@ import software.amazon.awscdk.services.dynamodb.AttributeType;
 import software.amazon.awscdk.services.dynamodb.BillingMode;
 import software.amazon.awscdk.services.dynamodb.GlobalSecondaryIndexProps;
 import software.amazon.awscdk.services.dynamodb.Table;
+import software.amazon.awscdk.services.lambda.Architecture;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.Tracing;
@@ -477,6 +478,7 @@ public class AppStack extends Stack {
                 .timeout(Duration.seconds(TIMEOUT))
                 .memorySize(MEMORY_SIZE)
                 .tracing(Tracing.ACTIVE)
+                .architecture(Architecture.ARM_64)
                 .logRetention(RetentionDays.FIVE_DAYS);
 
         return (handler != null) ? builder.handler(handler) : builder;
