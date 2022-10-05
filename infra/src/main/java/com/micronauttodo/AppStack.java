@@ -548,9 +548,9 @@ public class AppStack extends Stack {
                 .build();
         userPool.addTrigger(UserPoolOperation.POST_CONFIRMATION, postConfirmationFunction);
 
-        //Uncommented after you have run cdk deploy once and an A record exists for the zone
         if (hasDomain(cert, zone)) {
-        //    addDomain(cert, zone, userPool);
+            //Uncommented after you have run cdk deploy once and an A record exists for the zone
+            addDomain(cert, zone, userPool);
         } else {
             userPool.addDomain(project.getName() + "-userpool-domain", UserPoolDomainOptions.builder()
                             .cognitoDomain(CognitoDomainOptions.builder()
