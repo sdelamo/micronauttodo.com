@@ -91,6 +91,7 @@ public class AppStack extends Stack {
     private static final String HTTPS = "https://";
     public static final int MEMORY_SIZE = 2024;
     public static final int TIMEOUT = 20;
+    public static final String WSS = "wss://";
 
     private final Project project;
 
@@ -122,7 +123,9 @@ public class AppStack extends Stack {
 
         Map<String, String> functionEnvironmentVariables = environmentVariables(table);
         functionEnvironmentVariables.put("WEBSOCKETS_URL",
-                moduleDomain(project, project.getWebsockets()).orElseGet(webSocketApi::getApiEndpoint));
+                moduleDomain(project, project.getWebsockets())
+                        .map(u -> WSS + u)
+                        .orElseGet(webSocketApi::getApiEndpoint));
 
         Bucket openApiBucket = createBucket(project.getName() + "-s3-openapi");
         createBucketDeployment(openApiBucket, project.getOpenApi().getSubdomain());
