@@ -13,7 +13,6 @@ plugins {
 
 dependencies {
     runtimeOnly(project(":http-graalvm"))
-    runtimeOnly(project(":api-gateway"))
     runtimeOnly(project(":apigateway-websockets"))
     runtimeOnly(project(":repositories-dynamo"))
 }
