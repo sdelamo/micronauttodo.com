@@ -11,6 +11,8 @@ import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.services.apigateway.DomainName;
 import software.amazon.awscdk.services.apigateway.DomainNameOptions;
+import software.amazon.awscdk.services.apigateway.EndpointConfiguration;
+import software.amazon.awscdk.services.apigateway.EndpointType;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
 import software.amazon.awscdk.services.apigatewayv2.alpha.DomainMappingOptions;
 import software.amazon.awscdk.services.apigatewayv2.alpha.DomainNameAttributes;
@@ -402,7 +404,10 @@ public class AppStack extends Stack {
                 .orElse(null);
 
         LambdaRestApi.Builder builder = LambdaRestApi.Builder.create(this, project.getName() + "-lambda-rest-api")
-                .handler(function);
+                .handler(function)
+                .endpointConfiguration(EndpointConfiguration.builder()
+                        .types(Collections.singletonList(EndpointType.REGIONAL))
+                        .build());
         LambdaRestApi api = domainNameOptions != null ?
                 builder.domainName(domainNameOptions)
                 .build() :
