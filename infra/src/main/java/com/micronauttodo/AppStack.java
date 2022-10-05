@@ -549,7 +549,7 @@ public class AppStack extends Stack {
 
         //Uncommented after you have run cdk deploy once and an A record exists for the zone
         if (hasDomain(cert, zone)) {
-            //addDomain(cert, zone, userPool);
+            addDomain(cert, zone, userPool);
         } else {
             userPool.addDomain(project.getName() + "-userpool-domain", UserPoolDomainOptions.builder()
                             .cognitoDomain(CognitoDomainOptions.builder()
