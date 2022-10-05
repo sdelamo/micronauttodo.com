@@ -5,11 +5,11 @@ import io.micronaut.aws.cdk.function.MicronautFunctionFile;
 import io.micronaut.core.util.StringUtils;
 import io.micronaut.starter.application.ApplicationType;
 import io.micronaut.starter.options.BuildTool;
-import software.amazon.awscdk.App;
 import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
+import software.amazon.awscdk.services.apigateway.DomainName;
 import software.amazon.awscdk.services.apigateway.DomainNameOptions;
 import software.amazon.awscdk.services.apigateway.LambdaRestApi;
 import software.amazon.awscdk.services.apigatewayv2.alpha.DomainMappingOptions;
@@ -58,8 +58,10 @@ import software.amazon.awscdk.services.route53.HostedZoneProviderProps;
 import software.amazon.awscdk.services.route53.IHostedZone;
 import software.amazon.awscdk.services.route53.RecordTarget;
 import software.amazon.awscdk.services.route53.targets.ApiGateway;
+import software.amazon.awscdk.services.route53.targets.ApiGatewayDomain;
 import software.amazon.awscdk.services.route53.targets.ApiGatewayv2DomainProperties;
 import software.amazon.awscdk.services.route53.targets.CloudFrontTarget;
+import software.amazon.awscdk.services.route53.targets.UserPoolDomainTarget;
 import software.amazon.awscdk.services.s3.Bucket;
 import software.amazon.awscdk.services.s3.CorsRule;
 import software.amazon.awscdk.services.s3.HttpMethods;
@@ -390,21 +392,28 @@ public class AppStack extends Stack {
     }
 
     private LambdaRestApi createRestApi(Module module, Function function, Certificate cert, IHostedZone zone) {
+
+        Optional<String> url = moduleDomain(project, module);
+        DomainNameOptions domainNameOptions = url.map(s -> DomainNameOptions.builder()
+                .domainName(s)
+                .certificate(cert)
+                .build())
+                .orElse(null);
+
         LambdaRestApi.Builder builder = LambdaRestApi.Builder.create(this, project.getName() + "-lambda-rest-api")
                 .handler(function);
-        Optional<String> domainName = moduleDomain(project, module);
-        if (domainName.isPresent()) {
-            builder = builder.domainName(DomainNameOptions.builder()
-                            .domainName(domainName.get())
-                            .certificate(cert)
-                            .build());
-        }
-        LambdaRestApi api = builder.build();
-        domainName.ifPresent(url ->
+        LambdaRestApi api = domainNameOptions != null ?
+                builder.domainName(domainNameOptions)
+                .build() :
+                builder.build();
+
+        url.ifPresent(uri -> {
             ARecord.Builder.create(this, project.getName() + "-a-record-lambda-rest-api")
                     .zone(zone)
-                    .recordName(url)
-                    .target(RecordTarget.fromAlias(new ApiGateway(api))));
+                    .recordName(uri)
+                    .target(RecordTarget.fromAlias(new ApiGateway(api)));
+                });
+
         return api;
     }
 
@@ -557,11 +566,11 @@ public class AppStack extends Stack {
         UserPoolDomain userPoolDomain = userPool.addDomain(project.getName() + "-userpool-domain", UserPoolDomainOptions.builder()
                 .customDomain(createCustomDomainOptions(cert, domainName))
                 .build());
-        //ARecord.Builder.create(this, project.getName() + "-a-record-cognito-userpool")
-        //    .zone(zone)
-        //    .recordName(domainName)
-        //    .target(RecordTarget.fromAlias(new UserPoolDomainTarget(userPoolDomain)))
-        //    .build();
+        ARecord.Builder.create(this, project.getName() + "-a-record-cognito-userpool")
+            .zone(zone)
+            .recordName(domainName)
+            .target(RecordTarget.fromAlias(new UserPoolDomainTarget(userPoolDomain)))
+            .build();
     }
 
     public  CustomDomainOptions createCustomDomainOptions(Certificate cert, String domainName) {

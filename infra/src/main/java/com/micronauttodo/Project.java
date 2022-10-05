@@ -1,9 +1,6 @@
 package com.micronauttodo;
 
-import io.micronaut.context.exceptions.ConfigurationException;
 import io.micronaut.core.annotation.Introspected;
-
-import java.util.Collection;
 
 @Introspected
 public class Project {
