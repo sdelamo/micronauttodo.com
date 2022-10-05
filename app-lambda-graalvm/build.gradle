@@ -16,3 +16,6 @@ dependencies {
     runtimeOnly(project(":apigateway-websockets"))
     runtimeOnly(project(":repositories-dynamo"))
 }
+dockerfileNative {
+    graalArch.set(org.apache.tools.ant.taskdefs.condition.Os.isArch("aarch64") ? "aarch64" : "amd64")
+}
