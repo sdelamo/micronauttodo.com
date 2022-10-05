@@ -1,5 +1,7 @@
 #!/bin/bash
 EXIT_STATUS=0
+export CDK_DEFAULT_ACCOUNT=912735142396
+export CDK_DEFAULT_REGION=us-east-1
 ./gradlew test || EXIT_STATUS=$?
 if [ $EXIT_STATUS -ne 0 ]; then
  exit $EXIT_STATUS
