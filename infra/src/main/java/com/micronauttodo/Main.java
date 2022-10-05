@@ -23,8 +23,8 @@ public class Main {
         App app = new App();
         Project project = new Project(PROJECT_NAME,
                 PROJECT_DOMAIN,
-                new Module(MODULE_APP, SUBDOMAIN_WEBAPP, ROOT_PACKAGE),
-                //new GraalModule(MODULE_APP_GRAALVM, SUBDOMAIN_WEB, ROOT_PACKAGE),
+                //new Module(MODULE_APP, SUBDOMAIN_WEBAPP, ROOT_PACKAGE),
+                new GraalModule(MODULE_APP_GRAALVM, SUBDOMAIN_WEBAPP, ROOT_PACKAGE),
                 new Module(MODULE_WEBSOCKETS, SUBDOMAIN_WEBSOCKET, ROOT_PACKAGE + ".websockets.handler"),
                 new Module(MODULE_FUNCTION_COGNITO_POST_CONFIRMATION, SUBDOMAIN_AUTH,ROOT_PACKAGE + ".cognitopostconfirmation"),
                 new StaticWebsite(SUBDOMAIN_ASSETS, "index.html"),
