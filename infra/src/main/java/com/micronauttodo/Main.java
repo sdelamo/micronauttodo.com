@@ -10,12 +10,12 @@ public class Main {
     public static final String MODULE_APP_GRAALVM = "app-lambda-graalvm";
     public static final String MODULE_FUNCTION_COGNITO_POST_CONFIRMATION = "function-cognito-post-confirmation";
     private static final String ROOT_PACKAGE = "com.micronauttodo";
-    private static final String PROJECT_NAME = "mntodo";
+
+    private static final String PROJECT_NAME = "serverlesstodo";
     private static final String PROJECT_DOMAIN = null;
     public static final String SUBDOMAIN_WEBAPP = "app";
     public static final String SUBDOMAIN_AUTH = "auth";
     public static final String SUBDOMAIN_WEBSOCKET = "websocket";
-    public static final String SUBDOMAIN_WEB = "web";
     public static final String SUBDOMAIN_OPENAPI = "openapi";
     public static final String SUBDOMAIN_ASSETS = "assets";
 
@@ -31,7 +31,7 @@ public class Main {
                 new StaticWebsite(SUBDOMAIN_OPENAPI, "micronaut-todo-1.0.yml"),
                 new StaticWebsite(null, "index.html")
         );
-        new AppStack(project, app, project.getName() + "AppStack", StackProps.builder()
+        new AppStack(project, app, project.getName(), StackProps.builder()
                 .env(Environment.builder()
                         .account(System.getenv("CDK_DEFAULT_ACCOUNT"))
                         .region(System.getenv("CDK_DEFAULT_REGION"))
