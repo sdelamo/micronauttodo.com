@@ -12,7 +12,7 @@ public class Main {
     private static final String ROOT_PACKAGE = "com.micronauttodo";
     private static final String PROJECT_NAME = "mntodo";
     private static final String PROJECT_DOMAIN = null;
-    public static final String SUBDOMAIN_WEBAPP = "webapp";
+    public static final String SUBDOMAIN_WEBAPP = "app";
     public static final String SUBDOMAIN_AUTH = "auth";
     public static final String SUBDOMAIN_WEBSOCKET = "websocket";
     public static final String SUBDOMAIN_WEB = "web";
