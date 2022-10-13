@@ -23,42 +23,7 @@ micronaut:
     intercept-url-map:
       -
         http-method: GET
-        pattern: '/microstream/root'
-        access:
-          - 'isAnonymous()'
-      -
-        http-method: GET
-        pattern: '/microstream/*/root'
-        access:
-          - 'isAnonymous()'
-      -
-        http-method: GET
-        pattern: '/microstream/dictionary'
-        access:
-          - 'isAnonymous()'
-      -
-        http-method: GET
-        pattern: '/microstream/*/dictionary'
-        access:
-          - 'isAnonymous()'
-      -
-        http-method: GET
-        pattern: '/microstream/object/*'
-        access:
-          - 'isAnonymous()'
-      -
-        http-method: GET
-        pattern: '/microstream/*/object/*'
-        access:
-          - 'isAnonymous()'
-      -
-        http-method: GET
-        pattern: '/microstream/maintenance/filesStatistics'
-        access:
-          - 'isAnonymous()'
-      -
-        http-method: GET
-        pattern: '/microstream/*/maintenance/filesStatistics'
+        pattern: '/microstream/**'
         access:
           - 'isAnonymous()'
       -
