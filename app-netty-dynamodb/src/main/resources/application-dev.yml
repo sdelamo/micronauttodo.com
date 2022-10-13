@@ -4,7 +4,7 @@ dynamodb-local:
   host: 'localhost'
   port: 8000
 websockets:
-  url: 'localhost:8080/todo'
+  url: 'ws://localhost:8080/todo'
 micronaut:
   security:
     token:

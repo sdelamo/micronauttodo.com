@@ -1,5 +1,3 @@
-websockets:
-  url: 'localhost:8080/todo'
 micronaut:
   security:
     token:
@@ -17,4 +15,4 @@ endpoints:
   health:
     details-visible: anonymous
 websockets:
-  url: 'localhost:8080/todo'
+  url: 'ws://localhost:8080/todo'
