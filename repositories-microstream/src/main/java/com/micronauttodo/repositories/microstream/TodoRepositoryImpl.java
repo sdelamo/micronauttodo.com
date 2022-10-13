@@ -36,14 +36,6 @@ public class TodoRepositoryImpl implements TodoRepository {
         }
     }
 
-    @StoreReturn
-    Map<String, Todo> deleteTodos(Map<String, Map<String, Todo>> todos,
-                     String id,
-                     OAuthUser user) {
-        todos.get(user.getSub()).remove(id);
-        return todos.get(user.getSub());
-    }
-
     @Override
     public void save(@NonNull @NotNull @Valid Todo todo, @NonNull @NotNull @Valid OAuthUser user) {
         if (rootProvider.root().getTodos().containsKey(user.getSub())) {
@@ -51,22 +43,6 @@ public class TodoRepositoryImpl implements TodoRepository {
         } else {
             save(rootProvider.root().getTodos(), todo, user);
         }
-    }
-
-    @StoreParams("todos")
-    Map<String, Todo> save(Map<String, Map<String, Todo>> todos,
-                           Todo todo,
-                           OAuthUser user) {
-        todos.put(user.getSub(), CollectionUtils.mapOf(todo.getId(), todo));
-        return todos.get(user.getSub());
-    }
-
-    @StoreReturn
-    Map<String, Todo> append(Map<String, Map<String, Todo>> todos,
-              Todo todo,
-              OAuthUser user) {
-        todos.get(user.getSub()).put(todo.getId(), todo);
-        return todos.get(user.getSub());
     }
 
     @Override
@@ -82,6 +58,43 @@ public class TodoRepositoryImpl implements TodoRepository {
         return todos().containsKey(user.getSub()) ?
                 Optional.ofNullable(todos().get(user.getSub()).get(id)):
                 Optional.empty();
+    }
+
+    /**
+     * The rule is: "The Object that has been modified has to be stored!".
+     * To store a newly created object, store the "owner" of the object.
+     */
+    @StoreReturn
+    Map<String, Todo> deleteTodos(Map<String, Map<String, Todo>> todos,
+                                  String id,
+                                  OAuthUser user) {
+        todos.get(user.getSub()).remove(id);
+        return todos.get(user.getSub());
+    }
+
+    /**
+     * The rule is: "The Object that has been modified has to be stored!".
+     * To store a newly created object, store the "owner" of the object.
+     */
+    @StoreParams("todos")
+    Map<String, Todo> save(Map<String, Map<String, Todo>> todos,
+                           Todo todo,
+                           OAuthUser user) {
+        todos.put(user.getSub(), CollectionUtils.mapOf(todo.getId(), todo));
+        return todos.get(user.getSub());
+    }
+
+
+    /**
+     * The rule is: "The Object that has been modified has to be stored!".
+     * To store a newly created object, store the "owner" of the object.
+     */
+    @StoreReturn
+    Map<String, Todo> append(Map<String, Map<String, Todo>> todos,
+              Todo todo,
+              OAuthUser user) {
+        todos.get(user.getSub()).put(todo.getId(), todo);
+        return todos.get(user.getSub());
     }
 
     private Map<String, Map<String, Todo>> todos() {
