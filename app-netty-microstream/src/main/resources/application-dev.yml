@@ -9,7 +9,7 @@ microstream:
     enabled: true
   storage:
     todos:
-      storage-directory: '~/micronauttodo.com'
+      storage-directory: '~/serverlesstodo.com'
 ---
 endpoints:
   health:
