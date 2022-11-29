@@ -1,6 +1,6 @@
 plugins {
     id 'com.micronauttodo.build.internal.base-module'
-    id("io.micronaut.library") version "3.6.2"
+    id("io.micronaut.library") version "3.6.5"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
